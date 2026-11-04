@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Caribe Caracas 2027: festival de arte urbano en Caracas. Ruta, cronograma, organigrama y programa.">
+<title>Caribe Caracas 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+[hidden]{display:none!important}img{max-width:100%}
+#leaf{height:440px;width:100%;background:var(--soft)}@media (max-width:640px){#leaf{height:360px}}
+.leaflet-tooltip.st-tip{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none;font-family:var(--f-mono);font-size:11px;padding:1px 5px}
+.leaflet-tooltip.st-tip::before{display:none}
+.leaflet-container{font-family:var(--f-body)}
+/* Layout: una sola columna editorial; cada sección es una herramienta para recorrer (mapa, cronograma, organigrama) con panel de detalle al lado. */
+:root{
+  /* Paleta de las líneas del Metro de Caracas: L1 roja, L2 verde, L3 azul, L4 amarilla, L5 morada */
+  --l1:#D42A20; --l2:#0F8F4A; --l3:#1F57C3; --l4:#F0B400; --l5:#7A3D9E; --stripe:#2A221D; --on-l:#FFFFFF;
+  --bg:#ECEDEA; --surface:#F8F8F6; --ink:#15171A; --muted:#5B6068; --line:#C9CCC6; --soft:#DCDED8;
+  --graffiti:var(--l3); --mural:var(--l5); --sticker:#D9A100; --charla:var(--l2);
+  --metro:var(--l1); --avila:#C9D8C7; --rio:#AFC6DA; --park:#D3DFCB; --road:#FFFFFF;
+  --ok:#0F8F4A; --warn:#B7791F; --bad:#B42318;
+  --f-display:"Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --l1:#EF5B4F; --l2:#3DBB78; --l3:#6B95FF; --l4:#F5C63A; --l5:#B47AE0; --stripe:#0B0908;
+  --bg:#121417; --surface:#1B1E22; --ink:#ECEDEA; --muted:#A1A6AE; --line:#343940; --soft:#262A30;
+  --graffiti:var(--l3); --mural:var(--l5); --sticker:#F5C63A; --charla:var(--l2);
+  --metro:var(--l1); --avila:#22332A; --rio:#1E3446; --park:#25352A; --road:#2C3036;
+  --ok:#4FBF92; --warn:#E3A84A; --bad:#F2766B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --l1:#EF5B4F; --l2:#3DBB78; --l3:#6B95FF; --l4:#F5C63A; --l5:#B47AE0; --stripe:#0B0908;
+  --bg:#121417; --surface:#1B1E22; --ink:#ECEDEA; --muted:#A1A6AE; --line:#343940; --soft:#262A30;
+  --graffiti:var(--l3); --mural:var(--l5); --sticker:#F5C63A; --charla:var(--l2);
+  --metro:var(--l1); --avila:#22332A; --rio:#1E3446; --park:#25352A; --road:#2C3036;
+  --ok:#4FBF92; --warn:#E3A84A; --bad:#F2766B; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-stretch:115%;text-wrap:balance;margin:0;line-height:1.05}
+h2{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-.01em}
+h3{font-size:20px;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:18px;color:var(--muted);max-width:62ch}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--l3);outline-offset:2px}
+/* marcador de línea */
+.ln{display:flex;align-items:center;gap:10px}
+.ln i{font-style:normal;width:26px;height:26px;border-radius:50%;background:var(--c);color:var(--on-l);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:13px;letter-spacing:0}
+/* boleto */
+.ticket{position:relative;background:var(--l1);color:var(--on-l);border-radius:14px;padding:18px 22px 0;display:grid;gap:14px;transform:rotate(-3deg);transition:transform .3s;box-shadow:0 18px 30px -18px rgba(0,0,0,.45);max-width:420px;justify-self:center;width:100%}
+.ticket:hover{transform:rotate(0)}
+.ticket::before,.ticket::after{content:"";position:absolute;top:52%;width:22px;height:22px;border-radius:50%;background:var(--bg)}
+.ticket::before{left:-11px}.ticket::after{right:-11px}
+.t-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.t-top .t-l{width:26px;height:26px;border-radius:50%;border:2px solid var(--on-l);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:14px}
+.t-main b{display:block;font-family:var(--f-display);font-stretch:120%;font-weight:900;font-size:clamp(26px,3.4vw,34px);line-height:1}
+.t-main span{font-family:var(--f-mono);font-size:12px;opacity:.9}
+.t-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1.5px dashed rgba(255,255,255,.55);padding-top:10px}
+.t-grid small{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.t-grid b{font-family:var(--f-display);font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+.t-stripe{height:26px;background:var(--stripe);margin:0 -22px;border-radius:0 0 14px 14px}
+@media (prefers-reduced-motion:reduce){.ticket{transform:none}}
+a{color:inherit}
+
+/* nav */
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;align-items:center;gap:18px;padding-block:10px;overflow-x:auto;scrollbar-width:none}
+nav.top .brand{font-family:var(--f-display);font-weight:800;white-space:nowrap}
+nav.top a{text-decoration:none;font-size:14px;color:var(--muted);white-space:nowrap;padding:4px 2px;border-bottom:2px solid transparent}
+nav.top a.on{color:var(--ink);border-color:var(--ink)}
+nav.top .cta{margin-left:auto;background:var(--ink);color:var(--bg);padding:6px 12px;border-radius:999px;border:none}
+
+/* hero */
+.hero{padding-block:48px 40px;display:grid;gap:28px;overflow-x:clip}
+.hero-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:32px;align-items:center}
+.hero-top>div{display:grid;gap:20px;min-width:0}
+@media (max-width:820px){.hero-top{grid-template-columns:1fr}}
+.stripes{display:flex;height:14px;border-radius:2px;overflow:hidden}
+.stripes span{flex:1}
+.hero h1{font-size:clamp(46px,9vw,112px);font-weight:800;letter-spacing:-.025em}
+.hero .tag{font-family:var(--f-display);font-size:clamp(22px,3vw,32px);font-weight:500}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.facts div{background:var(--surface);padding:14px 16px}
+.facts b{display:block;font-family:var(--f-display);font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+.facts span{font-size:13px;color:var(--muted)}
+@media (max-width:640px){.facts div:last-child:nth-child(odd){grid-column:1/-1}}
+
+section{padding-block:56px;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:12px;margin-bottom:28px}
+
+/* movimientos */
+.moves{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.move{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:10px;transition:transform .15s,border-color .15s}
+.move:hover{transform:translateY(-2px)}
+.move[aria-pressed="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.move .dot{width:34px;height:34px;border-radius:50%;background:var(--c);display:grid;place-items:center;color:#fff;font-family:var(--f-mono);font-size:12px}
+.move .scale{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.move p{font-size:15px}
+.move .go{font-size:13px;color:var(--c);font-weight:600}
+
+/* mapa */
+.map-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+@media (max-width:860px){.map-grid{grid-template-columns:1fr}}
+.map-box{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative}
+.map-tools{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-bottom:1px solid var(--line);align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:none;background:none;padding:6px 12px;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip{border:1px solid var(--line);background:none;border-radius:999px;padding:5px 10px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--c);display:inline-block}
+.chip[aria-pressed="false"]{opacity:.45}
+.map-scroll{overflow-x:auto}
+svg#map{display:block;width:100%;min-width:640px;height:auto;font-family:var(--f-mono)}
+#map .site{cursor:pointer}
+#map .site:hover circle.pin,#map .site.sel circle.pin{stroke-width:4}
+#map text{fill:var(--ink)}
+#map .muted{fill:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:12px;align-content:start;min-width:0}
+.panel .kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:14px}
+.panel .kv dt{color:var(--muted)}.panel .kv dd{margin:0}
+.badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:3px;background:var(--soft);color:var(--ink)}
+.badge.c{background:var(--c);color:#fff}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ink);background:none;border-radius:4px;padding:8px 12px;font-size:14px;text-decoration:none}
+.btn.solid{background:var(--ink);color:var(--bg)}
+.list-sites{display:grid;gap:4px;margin-top:6px}
+.list-sites button{text-align:left;background:none;border:none;border-bottom:1px solid var(--soft);padding:8px 0;display:flex;gap:8px;align-items:center;font-size:14px}
+.list-sites button i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.note{font-size:12px;color:var(--muted)}
+
+/* cronograma */
+.tl{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;overflow-x:auto}
+.tl-track{position:relative;min-width:720px}
+.tl-months{display:grid;grid-template-columns:repeat(5,1fr);font-family:var(--f-mono);font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px}
+.tl-phases{position:relative;height:64px;margin-top:12px}
+.phase{position:absolute;top:0;height:44px;border:none;border-radius:4px;background:var(--soft);font-size:12.5px;font-weight:600;padding:0 8px;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:background .15s}
+.phase.hot{background:var(--l1);color:#fff}
+.phase[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.phase.rest{background:repeating-linear-gradient(45deg,var(--soft) 0 6px,transparent 6px 12px);color:var(--muted)}
+.gates{position:relative;height:28px}
+.gate{position:absolute;transform:translateX(-50%);border:none;background:none;font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--l1);padding:2px 4px}
+.gate::before{content:"◆ "}
+.gate[aria-pressed="true"]{background:var(--l1);color:#fff;border-radius:3px}
+.tl-detail{margin-top:16px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.week{display:grid;grid-template-columns:130px minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--soft);font-size:15px}
+.week b{font-family:var(--f-mono);font-size:13px;font-weight:500}
+.week .areas{font-size:12px;color:var(--muted);margin-top:3px}
+@media (max-width:560px){.week{grid-template-columns:1fr;gap:2px}}
+
+.paint{margin-top:28px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;display:grid;gap:14px}
+.days{display:grid;grid-template-columns:110px repeat(21,minmax(26px,1fr));gap:3px;min-width:720px;font-size:11px}
+.days .lab{font-size:12.5px;align-self:center}
+.days .hd{font-family:var(--f-mono);text-align:center;color:var(--muted);cursor:pointer;border-radius:3px;padding:2px 0}
+.days .hd.sel{background:var(--ink);color:var(--bg)}
+.days .c{height:26px;border-radius:2px;background:var(--soft);cursor:pointer}
+.days .c.prep{background:color-mix(in srgb,var(--c) 30%,var(--soft))}
+.days .c.work{background:var(--c)}
+.days .c.live{background:var(--c);background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.35) 0 4px,transparent 4px 8px)}
+.days .c.sel{outline:2px solid var(--ink);outline-offset:1px}
+.days-scroll{overflow-x:auto}
+input[type=range]{width:100%;accent-color:var(--l1)}
+.day-read{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.meter{display:grid;gap:4px;font-size:13px}
+.meter .bar{height:10px;background:var(--soft);border-radius:5px;overflow:hidden}
+.meter .bar span{display:block;height:100%;background:var(--c);transition:width .3s}
+.day-title{font-family:var(--f-display);font-size:22px;font-weight:700}
+.rule{border-left:4px solid var(--l1);padding:10px 14px;background:var(--surface);font-size:15px;margin-top:16px}
+
+/* programa */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:10px 14px;text-align:left;display:grid}
+.tabs button small{font-family:var(--f-mono);color:var(--muted);font-size:11px}
+.tabs button[aria-selected="true"]{border-color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
+.prog{display:grid;gap:8px}
+.slot{display:grid;grid-template-columns:90px minmax(0,1fr);gap:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:4px;padding:12px}
+.slot b{font-family:var(--f-mono);font-size:13px;font-weight:500}
+
+/* organigrama */
+.org-tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px}
+.count{font-family:var(--f-display);font-size:36px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.org-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}
+@media (max-width:900px){.org-grid{grid-template-columns:1fr}}
+.org{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:18px}
+.org .lvl{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.node{border:1.5px solid var(--ink);background:var(--bg);border-radius:5px;padding:10px 12px;text-align:center;min-width:0;display:grid;gap:2px;position:relative}
+.node small{font-size:12px;color:var(--muted)}
+.node .n{position:absolute;top:-10px;right:-8px;background:var(--ink);color:var(--bg);font-family:var(--f-mono);font-size:11px;border-radius:999px;padding:1px 7px}
+.node.top{background:var(--ink);color:var(--bg)}
+.node.top small{color:var(--soft)}
+.node.dir{border-color:var(--l1);border-width:2px}
+.node[aria-pressed="true"]{outline:3px solid var(--l1);outline-offset:2px}
+.branches{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:14px}
+@media (max-width:640px){.branches{grid-template-columns:1fr}}
+.branch{display:grid;gap:10px;align-content:start;border-top:2px solid var(--line);padding-top:12px}
+.branch .deps{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.branch>.eyebrow{text-align:center}
+
+.merch{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.mi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:10px;align-content:start;text-align:left}
+.mi[aria-pressed="true"]{border-color:var(--l1);box-shadow:inset 0 0 0 1px var(--l1)}
+.mi svg{width:100%;height:150px;display:block;background:var(--soft);border-radius:6px}
+.mi .scale{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.mi p{font-size:14.5px}
+.mi-detail{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--l1);border-radius:6px;padding:16px;display:grid;gap:8px}
+.book{margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:20px;align-items:start}
+@media (max-width:820px){.book{grid-template-columns:1fr}}
+.pages{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;position:relative}
+.slot-f{aspect-ratio:1;border:1.5px dashed var(--line);border-radius:6px;background:none;display:grid;place-items:center;text-align:center;font-size:11px;padding:6px;position:relative;color:var(--muted)}
+.slot-f b{font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;display:block}
+.slot-f.on{border-style:solid;border-color:var(--c);color:var(--ink)}
+.slot-f.on::after{content:"FIRMADO";position:absolute;inset:auto 8px 10px;transform:rotate(-12deg);border:2px solid var(--c);color:var(--c);font-family:var(--f-display);font-weight:900;font-size:11px;letter-spacing:.08em;border-radius:4px;padding:1px 0}
+/* riesgos */
+.risks{display:grid;gap:8px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px}
+summary{cursor:pointer;font-weight:600;list-style:none;display:flex;gap:10px;align-items:baseline}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-family:var(--f-mono);color:var(--l1)}
+details[open] summary::before{content:"–"}
+details p{margin-top:8px;color:var(--muted);font-size:15px}
+
+/* solicitud */
+.req{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:820px){.req{grid-template-columns:1fr}}
+form{position:relative;background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--l1);border-radius:12px;padding:20px 20px 46px;display:grid;gap:14px}
+form::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24px;background:var(--stripe);border-radius:0 0 11px 11px}
+label{display:grid;gap:5px;font-size:14px;font-weight:500}
+input,select,textarea{font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);width:100%}
+textarea{min-height:80px;resize:vertical}
+.status{border-radius:4px;padding:12px 14px;font-size:15px;background:var(--soft)}
+.status.ok{border-left:4px solid var(--ok)}.status.warn{border-left:4px solid var(--warn)}.status.bad{border-left:4px solid var(--bad)}
+.admin{margin-top:28px;background:var(--surface);border:1.5px dashed var(--ink);border-radius:6px;padding:18px;display:grid;gap:12px}
+.admin table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+.admin th{text-align:left;font-weight:600;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);padding:6px}
+.admin td{border-bottom:1px solid var(--soft);padding:8px 6px;vertical-align:top}
+.admin .acts{display:flex;gap:6px;flex-wrap:wrap}
+.admin .acts button{border:1px solid var(--line);background:none;border-radius:4px;padding:4px 8px;font-size:13px}
+.st{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;padding:2px 6px;border-radius:3px}
+.st.pendiente{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.st.aprobado{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.st.rechazado{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<nav class="top" aria-label="Secciones">
+  <div class="wrap">
+    <span class="brand ln" style="--c:var(--l1)"><i>1</i>Caribe Caracas</span>
+    <a href="#movimientos">Movimientos</a>
+    <a href="#artistas">Artistas</a>
+    <a href="#mapa">Ruta</a>
+    <a href="#cronograma">Cronograma</a>
+    <a href="#programa">Programa</a>
+    <a href="#merch">Merch</a>
+    <a href="#equipo">Equipo</a>
+    <a href="#riesgos">Riesgos</a>
+    <a class="cta" href="#deck">Solicitar el deck</a>
+  </div>
+</nav>
+
+<header class="wrap hero">
+  <div class="stripes" aria-hidden="true"><span style="background:var(--l1)"></span><span style="background:var(--l2)"></span><span style="background:var(--l3)"></span><span style="background:var(--l4)"></span><span style="background:var(--l5)"></span></div>
+  <div class="hero-top"><div>
+  <p class="eyebrow">Festival de arte urbano · Propuesta de CMS-Caribes · Versión para comité</p>
+  <h1>Caribe Caracas 2027</h1>
+  <p class="tag">Caracas y sus calles hablan.</p>
+  <p class="lede">Tres días abiertos al público para que la ciudad vuelva a expresarse a través de sus muros. Graffiti, murales y stickers recorren la ciudad siguiendo la Línea 1 del Metro, con artistas de Caracas, de la diáspora y de la región.</p>
+  </div>
+  <div class="ticket" role="img" aria-label="Boleto de acceso a la ruta del festival, válido del 5 al 7 de marzo de 2027">
+    <div class="t-top"><span class="t-l">1</span><span>Caribe Caracas · 2027</span><span>Nº 000021</span></div>
+    <div class="t-main"><b>Acceso a la ruta</b><span>Plaza Venezuela → Los Cortijos</span></div>
+    <div class="t-grid"><div><small>Válido</small><b>05–07.03</b></div><div><small>Obras</small><b>14</b></div><div><small>Artistas</small><b>21</b></div></div>
+    <div class="t-stripe"></div>
+  </div>
+  </div>
+  <div class="facts">
+    <div><b>5–7 mar</b><span>2027, tres días abiertos al público</span></div>
+    <div><b>21</b><span>artistas: 8 locales, 8 de la diáspora, 5 invitados</span></div>
+    <div><b>14</b><span>obras: 4 fachadas y 10 murales de calle</span></div>
+    <div><b>3</b><span>movimientos: graffiti, mural y sticker</span></div>
+    <div><b>11 días</b><span>de pintura en fachadas antes de abrir</span></div>
+  </div>
+</header>
+
+<section id="movimientos">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l1)"><i>1</i>El concepto</p>
+      <h2>Tres movimientos, una ciudad</h2>
+      <p class="lede">Cada movimiento es una capa de la ciudad a otra escala. Las conversaciones con los artistas las atraviesan a todas. Elige uno para verlo en la ruta.</p>
+    </div>
+    <div class="moves" id="moves"></div>
+  </div>
+</section>
+
+<section id="artistas">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l4)"><i style="color:var(--ink)">★</i>Artistas y aliados</p>
+      <h2>Con quién queremos pintar</h2>
+      <p class="lede">Perfiles en evaluación para murales y para la convocatoria de stickers. Ninguno está confirmado: la selección final la hace la curaduría de CMS-Caribes.</p>
+    </div>
+    <div class="moves" id="artists"></div>
+  </div>
+</section>
+
+<section id="mapa">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l2)"><i>2</i>La ruta</p>
+      <h2>La ciudad como sistema de movimiento</h2>
+      <p class="lede">Los muros propuestos quedan cerca del eje de la Línea 1. Cada muro funciona como una estación y los stickers conectan una estación con otra. Cambia entre la vista de ciudad y la vista de sistema.</p>
+    </div>
+    <div class="map-grid">
+      <div class="map-box">
+        <div class="map-tools">
+          <div class="seg" role="group" aria-label="Vista del mapa">
+            <button id="v-geo" aria-pressed="true">Vista ciudad</button>
+            <button id="v-sys" aria-pressed="false">Vista sistema</button>
+          </div>
+          <div id="filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+        <div id="leaf" role="region" aria-label="Mapa real de la ruta"></div>
+        <div class="map-scroll" hidden><svg id="map" viewBox="0 0 1000 400" role="img" aria-label="Mapa de la ruta del festival sobre la Línea 1 del Metro de Caracas"></svg></div>
+        <div class="legend">
+          <span>● Muro de calle propuesto</span><span>◌ Zona de búsqueda de fachada</span><span>━ Línea 1 del Metro</span><span>Ubicaciones aproximadas · a verificar en campo</span>
+        </div>
+      </div>
+      <aside class="panel" id="site-panel" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
+<section id="cronograma">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l3)"><i>3</i>El plan</p>
+      <h2>De noviembre a marzo, en cinco controles</h2>
+      <p class="lede">Toca una fase o un hito para ver qué se cierra cada semana. Si un hito no se cumple, se ajusta el alcance o se mueve la fecha.</p>
+    </div>
+    <div class="tl">
+      <div class="tl-track">
+        <div class="tl-months"><span>Noviembre</span><span>Diciembre</span><span>Enero</span><span>Febrero</span><span>Marzo</span></div>
+        <div class="tl-phases" id="phases"></div>
+        <div class="gates" id="gates"></div>
+      </div>
+      <div class="tl-detail" id="tl-detail"></div>
+    </div>
+
+    <div class="paint" id="paint">
+      <div style="display:grid;gap:6px">
+        <p class="eyebrow">Calendario de pintura · 15 de febrero al 7 de marzo</p>
+        <h3>Tres días de festival, veintiuno de trabajo</h3>
+        <p class="note">Arrastra o toca un día para ver cómo avanza cada obra.</p>
+      </div>
+      <div class="days-scroll"><div class="days" id="days"></div></div>
+      <input type="range" id="day-range" min="0" max="20" value="17" aria-label="Día del calendario de pintura">
+      <div class="day-read" id="day-read"></div>
+    </div>
+    <p class="rule"><b>Regla de pintura:</b> ninguna obra se termina antes del festival. Cada una llega al viernes con un tramo final que se pinta frente al público. Si el miércoles 3 alguna fachada no llega al 70%, se pinta la versión reducida del diseño acordada con los artistas.</p>
+  </div>
+</section>
+
+<section id="programa">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l4)"><i>4</i>Los tres días</p>
+      <h2>Lo que vive el público</h2>
+    </div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="prog" id="prog" role="tabpanel"></div>
+  </div>
+</section>
+
+<section id="merch">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l3)"><i>★</i>Merch del festival</p>
+      <h2>Algo para llevarse la ruta a casa</h2>
+      <p class="lede">Piezas propias del festival, diseñadas con los artistas. Sirven como recuerdo, como ingreso para el festival y como forma de que la diáspora participe desde fuera. Toca una pieza para ver cómo funciona.</p>
+    </div>
+    <div class="merch" id="merch-grid"></div>
+    <div class="mi-detail" id="merch-detail" aria-live="polite"></div>
+    <div class="book">
+      <div style="display:grid;gap:10px">
+        <h3>Libreta de ruta</h3>
+        <p>Una libreta con una página por obra. El público la lleva por la ruta y cada artista la firma en su muro. Con todas las firmas, la libreta se vuelve una pieza única del festival.</p>
+        <p class="note">Ejemplo interactivo: toca una página para marcarla como firmada.</p>
+        <p><span class="count" id="sig-count" style="font-size:30px">0</span> <span class="note">de 14 firmas</span></p>
+      </div>
+      <div class="pages" id="pages"></div>
+    </div>
+  </div>
+</section>
+
+<section id="equipo">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l5)"><i>5</i>Quién lo hace</p>
+      <h2>Organigrama por departamento</h2>
+      <p class="lede">Un comité de dirección, dos direcciones y nueve departamentos, cada uno con una sola persona responsable. Cambia de fase para ver cómo crece el equipo y toca un área para ver qué entrega.</p>
+    </div>
+    <div class="org-tools">
+      <div class="seg" role="group" aria-label="Fase">
+        <button id="ph-pre" aria-pressed="true">Preproducción · nov a ene</button>
+        <button id="ph-pro" aria-pressed="false">Producción · feb a mar</button>
+      </div>
+      <div><div class="count" id="org-count">18</div><div class="note">personas, estimado, sin proveedores</div></div>
+    </div>
+    <div class="org-grid">
+      <div class="org" id="org"></div>
+      <aside class="panel" id="org-panel" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
+<section id="riesgos">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l1)"><i>6</i>Riesgos</p>
+      <h2>Lo que puede fallar y cómo lo gestionamos</h2>
+    </div>
+    <div class="risks" id="risks"></div>
+  </div>
+</section>
+
+<section id="deck">
+  <div class="wrap req">
+    <div class="sec-head" style="margin:0">
+      <p class="eyebrow ln" style="--c:var(--l2)"><i>7</i>Siguiente paso</p>
+      <h2>Solicita el deck completo</h2>
+      <p class="lede">El deck incluye el detalle de producción, los escenarios de presupuesto y las oportunidades de alianza. Cada solicitud se revisa y, una vez aprobada, el deck se envía al correo indicado.</p>
+      <div id="my-status"></div>
+    </div>
+    <form id="req-form" name="solicitud-deck" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+      <input type="hidden" name="form-name" value="solicitud-deck">
+      <p hidden><label>No completar<input name="bot-field"></label></p>
+      <label for="f-nombre">Nombre y apellido<input id="f-nombre" name="nombre" required autocomplete="name"></label>
+      <label for="f-correo">Correo<input id="f-correo" name="correo" type="email" required autocomplete="email"></label>
+      <label for="f-org">Organización<input id="f-org" name="organizacion" required autocomplete="organization"></label>
+      <label for="f-perfil">Interés
+        <select id="f-perfil" name="perfil" required>
+          <option value="">Elige una opción</option>
+          <option>Patrocinio</option><option>Institución pública</option><option>Aliado cultural</option><option>Medio de comunicación</option><option>Artista o colectivo</option><option>Otro</option>
+        </select></label>
+      <label for="f-msg">Mensaje (opcional)<textarea id="f-msg" name="mensaje" placeholder="Cuéntanos qué te interesa del proyecto"></textarea></label>
+      <button class="btn solid" type="submit" id="f-send">Enviar solicitud</button>
+      <p class="note" id="f-note">Tus datos solo se usan para enviarte el deck y dar seguimiento a esta solicitud.</p>
+    </form>
+  </div>
+  
+</section>
+
+<footer><div class="wrap">Caribe Caracas 2027 · Propuesta de CMS-Caribes · Documento de trabajo, noviembre de 2026. Ubicaciones, fechas y artistas sujetos a confirmación.</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const el=(t,a={},h='')=>{const e=document.createElement(t);for(const k in a){if(k==='style')e.style.cssText=a[k];else if(k.startsWith('on'))e.addEventListener(k.slice(2),a[k]);else e.setAttribute(k,a[k])}if(h)e.innerHTML=h;return e};
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- movimientos ---------- */
+const MOVES=[
+ {id:'graffiti',n:'Graffiti',c:'--graffiti',k:'G',scale:'10 muros de calle · a ras de piso',t:'Letras, piezas y escritores. Tiene el lugar central de la curaduría.'},
+ {id:'mural',n:'Mural',c:'--mural',k:'M',scale:'4 fachadas · andamio o grúa',t:'Obras de gran formato en parejas mixtas: local, diáspora e internacional.'},
+ {id:'sticker',n:'Sticker',c:'--sticker',k:'S',scale:'Cientos de piezas · superficies habilitadas',t:'La pieza más pequeña y móvil. Convocatoria abierta, también para la diáspora que no puede viajar.'},
+ {id:'charla',n:'Conversaciones',c:'--charla',k:'C',scale:'Transversal · en vivo y registradas',t:'Encuentros con los artistas de cada movimiento sobre proceso, historia y ciudad.'}];
+const movesBox=$('#moves');
+MOVES.forEach(m=>{const b=el('button',{class:'move','aria-pressed':'false',style:`--c:var(${m.c})`,'data-id':m.id},
+ `<span class="dot">${m.k}</span><h3>${m.n}</h3><span class="scale">${m.scale}</span><p>${m.t}</p><span class="go">Ver en la ruta →</span>`);
+ b.onclick=()=>{setFilter(m.id);document.getElementById('mapa').scrollIntoView({behavior:'smooth'})};movesBox.append(b)});
+
+/* ---------- artistas ---------- */
+const ART=[
+ {n:'Caribes Tribu',h:'caribestribu',m:'graffiti',r:'Crew curadora del festival',t:'El colectivo detrás de la propuesta, con más de veinte años de graffiti caraqueño.'},
+ {n:'Felipe Pantone',h:'felipepantone',m:'mural',r:'Posible artista de fachada',t:'Obra de graffiti y arte óptico que dialoga con el cinetismo venezolano.'},
+ {n:'Ledania',h:'ledania',m:'mural',r:'Posible artista de fachada',t:'Muralista colombiana de gran formato.'},
+ {n:'holalou',h:'holalou',m:'mural',r:'Posible artista de mural',t:'Perfil en evaluación para murales.'},
+ {n:'Sticker Expo',h:'stickerexpo',m:'sticker',r:'Posible aliado de stickers',t:'Referente para la convocatoria y la jornada de stickers.'}];
+$('#artists').innerHTML=ART.map(a=>{const m=MOVES.find(x=>x.id===a.m);return `<a class="move" style="--c:var(${m.c});text-decoration:none" href="https://www.instagram.com/${a.h}/" target="_blank" rel="noopener"><span class="badge c" style="justify-self:start">${m.n}</span><h3>${esc(a.n)}</h3><span class="scale">@${a.h} · ${esc(a.r)}</span><p>${esc(a.t)}</p><span class="go">Ver perfil ↗</span></a>`}).join('');
+
+/* ---------- mapa ---------- */
+const LON0=-66.893,LON1=-66.803,LAT0=10.479,LAT1=10.513;
+const P=(lat,lon)=>[(lon-LON0)/(LON1-LON0)*1000,(LAT1-lat)/(LAT1-LAT0)*400];
+const ST=[
+ ['pv','Plaza Venezuela',10.4990,-66.8835],['sg','Sabana Grande',10.4958,-66.8763],['ct','Chacaíto',10.4919,-66.8689],
+ ['ch','Chacao',10.4916,-66.8545],['al','Altamira',10.4964,-66.8488],['mi','Miranda',10.4935,-66.8330],
+ ['dc','Los Dos Caminos',10.4958,-66.8222],['lc','Los Cortijos',10.4985,-66.8135]].map(([id,n,la,lo],i)=>({id,n,ll:[la,lo],geo:P(la,lo),sys:[90+i*117,205]}));
+const stById=Object.fromEntries(ST.map(s=>[s.id,s]));
+const q=s=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(s);
+const osm=(la,lo)=>`https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=17/${la}/${lo}`;
+const SITES=[
+ {id:'s1',n:'Bulevar de Sabana Grande',z:'Sabana Grande',mun:'Libertador',st:'sg',ll:[10.4950,-66.8745],side:-1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Bulevar de Sabana Grande, Caracas'},
+ {id:'s2',n:'Muro frente al Centro Lido',z:'El Rosal',mun:'Chacao',st:'ct',ll:[10.4912,-66.8627],side:1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Centro Lido, El Rosal, Caracas'},
+ {id:'s3',n:'Muro frente al Sambil',z:'Chacao',mun:'Chacao',st:'ch',ll:[10.4890,-66.8540],side:1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Centro Sambil, Chacao, Caracas'},
+ {id:'s4',n:'Zona de San Ignacio',z:'La Castellana',mun:'Chacao',st:'al',ll:[10.4985,-66.8560],side:-1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Centro San Ignacio, Caracas'},
+ {id:'s5',n:'Cancha de Parque Miranda',z:'Los Dos Caminos',mun:'Sucre',st:'mi',ll:[10.4935,-66.8270],side:1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Parque Generalísimo Francisco de Miranda, Caracas'},
+ {id:'f1',n:'Zona de fachada A',z:'Plaza Venezuela',mun:'Libertador',st:'pv',ll:[10.5012,-66.8815],side:-1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Plaza Venezuela, Caracas',zone:1},
+ {id:'f2',n:'Zona de fachada B',z:'Chacaíto',mun:'Chacao',st:'ct',ll:[10.4938,-66.8700],side:-1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Chacaíto, Caracas',zone:1},
+ {id:'f3',n:'Zona de fachada C',z:'Altamira',mun:'Chacao',st:'al',ll:[10.4950,-66.8470],side:1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Plaza Altamira, Caracas',zone:1},
+ {id:'f4',n:'Zona de fachada D',z:'Los Dos Caminos',mun:'Sucre',st:'dc',ll:[10.4978,-66.8205],side:-1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Los Dos Caminos, Caracas',zone:1}];
+// schematic positions: stack sites at their station
+const stackCount={};
+SITES.forEach(s=>{s.geo=P(...s.ll);const key=s.st+s.side;stackCount[key]=(stackCount[key]||0)+1;const n=stackCount[key];const sx=stById[s.st].sys[0];s.sys=[sx+(n-1)*44*(s.side<0?1:-1)*0+(n>1?40:0),205+s.side*(s.zone?70:120)]});
+const svgNS='http://www.w3.org/2000/svg';
+const S=(t,a={})=>{const e=document.createElementNS(svgNS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+const map=$('#map');
+const path=pts=>pts.map((p,i)=>(i?'L':'M')+P(...p).map(v=>v.toFixed(1)).join(' ')).join(' ');
+// background (geo only)
+const bg=S('g',{id:'bg'});
+const avila=[[10.513,-66.893],[10.5072,-66.893],[10.5052,-66.875],[10.5070,-66.858],[10.5050,-66.840],[10.5058,-66.826],[10.5040,-66.812],[10.5045,-66.803],[10.513,-66.803]];
+bg.append(S('path',{d:path(avila)+'Z',fill:'var(--avila)'}));
+const lblA=S('text',{x:500,y:16,'text-anchor':'middle','font-size':12,class:'muted','letter-spacing':'2'});lblA.textContent='EL ÁVILA · PARQUE NACIONAL WARAIRA REPANO';bg.append(lblA);
+bg.append(S('path',{d:path([[10.4950,-66.8395],[10.4950,-66.8262],[10.4893,-66.8262],[10.4893,-66.8395]])+'Z',fill:'var(--park)'}));
+const lblP=S('text',{x:P(10.4915,-66.834)[0],y:P(10.4915,-66.834)[1]+18,'text-anchor':'middle','font-size':10,class:'muted'});lblP.textContent='Parque del Este';bg.append(lblP);
+const rio=[[10.4935,-66.893],[10.4898,-66.876],[10.4858,-66.861],[10.4845,-66.846],[10.4858,-66.830],[10.4874,-66.815],[10.4885,-66.803]];
+bg.append(S('path',{d:path(rio),fill:'none',stroke:'var(--rio)','stroke-width':7,'stroke-linecap':'round'}));
+const lblR=S('text',{x:P(10.4835,-66.846)[0],y:P(10.4835,-66.846)[1]+10,'text-anchor':'middle','font-size':10,class:'muted'});lblR.textContent='Río Guaire';bg.append(lblR);
+const fdm=[[10.4919,-66.8689],[10.4922,-66.858],[10.4925,-66.853],[10.4966,-66.8488],[10.4960,-66.840],[10.4958,-66.830],[10.4962,-66.822],[10.4990,-66.813],[10.5000,-66.803]];
+const lib=[[10.4990,-66.889],[10.4935,-66.870],[10.4900,-66.858],[10.4893,-66.849],[10.4905,-66.840]];
+const sgb=[[10.4972,-66.8845],[10.4958,-66.8763],[10.4930,-66.8700]];
+[[fdm,'Av. Francisco de Miranda',[10.4975,-66.836]],[lib,'Av. Libertador',[10.4878,-66.864]],[sgb,'',null]].forEach(([pts,name,at])=>{
+ bg.append(S('path',{d:path(pts),fill:'none',stroke:'var(--line)','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'}));
+ bg.append(S('path',{d:path(pts),fill:'none',stroke:'var(--road)','stroke-width':3.5,'stroke-linecap':'round','stroke-linejoin':'round'}));
+ if(at){const p=P(...at);const t=S('text',{x:p[0],y:p[1],'font-size':10,class:'muted','text-anchor':'middle'});t.textContent=name;bg.append(t)}});
+map.append(bg);
+// north arrow + scale
+const deco=S('g',{id:'deco'});
+deco.append(S('path',{d:'M968 352 l8 22 l-8 -6 l-8 6z',fill:'var(--ink)'}));const nt=S('text',{x:968,y:346,'text-anchor':'middle','font-size':11});nt.textContent='N';deco.append(nt);
+const km=1/111.32/Math.cos(10.49*Math.PI/180)/(LON1-LON0)*1000; // px per km
+deco.append(S('line',{x1:24,y1:378,x2:24+km,y2:378,stroke:'var(--ink)','stroke-width':2}));const kt=S('text',{x:24,y:370,'font-size':10});kt.textContent='1 km';deco.append(kt);
+map.append(deco);
+// connectors, metro, stations, sites
+const conG=S('g'),metroG=S('g'),stG=S('g'),siteG=S('g');map.append(conG,metroG,stG,siteG);
+const metro=S('path',{fill:'none',stroke:'var(--metro)','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'});
+const stickerLine=S('path',{fill:'none',stroke:'var(--sticker)','stroke-width':2.5,'stroke-dasharray':'2 7','stroke-linecap':'round',opacity:0});
+metroG.append(metro,stickerLine);
+const l1=S('text',{'font-size':11,'font-weight':500,'text-anchor':'end'});l1.textContent='LÍNEA 1';metroG.append(l1);
+ST.forEach(s=>{s.g=S('g');s.c=S('circle',{r:7,fill:'var(--surface)',stroke:'var(--metro)','stroke-width':3});s.t=S('text',{'font-size':11,'text-anchor':'middle'});s.t.textContent=s.n;s.g.append(s.c,s.t);stG.append(s.g)});
+const colorOf=s=>s.mv.includes('mural')?'var(--mural)':'var(--graffiti)';
+SITES.forEach(s=>{s.con=S('line',{stroke:'var(--muted)','stroke-width':1.2,'stroke-dasharray':'3 3'});conG.append(s.con);
+ s.g=S('g',{class:'site',tabindex:0,role:'button','aria-label':s.n});
+ s.ring=S('circle',{r:s.zone?16:0,fill:'none',stroke:colorOf(s),'stroke-width':2,'stroke-dasharray':'4 4'});
+ s.pin=S('circle',{class:'pin',r:s.zone?6:9,fill:s.zone?'var(--surface)':colorOf(s),stroke:s.zone?colorOf(s):'var(--surface)','stroke-width':2.5});
+ s.stk=S('rect',{width:8,height:8,rx:1.5,fill:'var(--sticker)',opacity:0,transform:'rotate(12)'});
+ s.t=S('text',{'font-size':11,'font-weight':500,'text-anchor':'middle'});s.t.textContent=s.zone?s.n.replace('Zona de f','F'):s.n.replace('Muro frente al ','');
+ s.g.append(s.ring,s.pin,s.stk,s.t);siteG.append(s.g);
+ s.g.addEventListener('click',()=>selectSite(s.id));s.g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectSite(s.id)}})});
+let mode='geo',tween=1,from='geo';
+const lerp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+function pos(o){return from===mode?o[mode]:lerp(o[from],o[mode],tween)}
+const GST={pv:[0,-14,'middle'],sg:[0,-14,'middle'],ct:[-10,16,'end'],ch:[-10,-10,'end'],al:[0,-14,'middle'],mi:[-8,20,'end'],dc:[-10,-8,'end'],lc:[0,24,'middle']};
+const GSI={s1:[-12,4,'end'],s2:[0,24,'middle'],s3:[0,24,'middle'],s4:[0,-14,'middle'],s5:[12,4,'start']};
+function draw(){
+ const inSys=from===mode?mode==='sys':(tween>.5?mode==='sys':from==='sys');
+ const pts=ST.map(pos);metro.setAttribute('d',pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(''));
+ const sw=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+(p[1]+(inSys?-12:12)).toFixed(1)).join('');stickerLine.setAttribute('d',sw);
+ l1.setAttribute('x',pts[0][0]-14);l1.setAttribute('y',pts[0][1]+4);
+ const op=from===mode?(mode==='geo'?1:0):(mode==='geo'?tween:1-tween);bg.style.opacity=op;deco.style.opacity=op;
+ ST.forEach((s,i)=>{const p=pts[i];s.c.setAttribute('cx',p[0]);s.c.setAttribute('cy',p[1]);
+  const o=inSys?[0,32,'middle']:GST[s.id];s.t.setAttribute('x',p[0]+o[0]);s.t.setAttribute('y',p[1]+o[1]);s.t.setAttribute('text-anchor',o[2])});
+ SITES.forEach(s=>{const p=pos(s),sp=pos(stById[s.st]);s.pin.setAttribute('cx',p[0]);s.pin.setAttribute('cy',p[1]);s.ring.setAttribute('cx',p[0]);s.ring.setAttribute('cy',p[1]);
+  s.stk.setAttribute('x',p[0]+7);s.stk.setAttribute('y',p[1]-13);s.stk.setAttribute('transform',`rotate(14 ${p[0]+11} ${p[1]-9})`);
+  let o;if(inSys)o=[0,s.side<0?-(s.zone?22:16):(s.zone?30:24),'middle'];else o=s.zone?[0,-22,'middle']:GSI[s.id];
+  s.t.setAttribute('x',p[0]+o[0]);s.t.setAttribute('y',p[1]+o[1]);s.t.setAttribute('text-anchor',o[2]);
+  s.t.style.opacity=(!inSys&&s.zone&&!s.g.classList.contains('sel'))?0:1;
+  s.con.setAttribute('x1',p[0]);s.con.setAttribute('y1',p[1]);s.con.setAttribute('x2',sp[0]);s.con.setAttribute('y2',sp[1])});
+}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function setMode(m){if(m===mode)return;from=mode;mode=m;tween=0;$('#v-geo').setAttribute('aria-pressed',m==='geo');$('#v-sys').setAttribute('aria-pressed',m==='sys');
+ if(reduce){tween=1;from=mode;draw();return}
+ const t0=performance.now();const step=t=>{tween=Math.min(1,(t-t0)/900);tween=tween<.5?2*tween*tween:1-Math.pow(-2*tween+2,2)/2;draw();if((t-t0)<900)requestAnimationFrame(step);else{from=mode;tween=1;draw()}};requestAnimationFrame(step)}
+const leafEl=$('#leaf'),svgWrap=document.querySelector('.map-scroll');let lmap=null;const LL={};
+function showGeo(){$('#v-geo').setAttribute('aria-pressed','true');$('#v-sys').setAttribute('aria-pressed','false');if(!lmap){setMode('geo');return}setMode('geo');setTimeout(()=>{if(mode!=='geo')return;svgWrap.hidden=true;leafEl.hidden=false;lmap.invalidateSize()},reduce?0:950)}
+function showSys(){if(lmap){leafEl.hidden=true;svgWrap.hidden=false}setMode('sys')}
+$('#v-geo').onclick=showGeo;$('#v-sys').onclick=showSys;
+function initLeaflet(){if(!window.L){leafEl.hidden=true;svgWrap.hidden=false;return}
+ const dark=document.documentElement.dataset.theme==='dark'||(document.documentElement.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
+ lmap=L.map(leafEl,{scrollWheelZoom:false,zoomControl:true});
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/'+(dark?'dark_all':'light_all')+'/{z}/{x}/{y}{r}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:19}).addTo(lmap);
+ const C={metro:css('--l1'),surface:css('--surface'),mural:css('--l5'),graffiti:css('--l3'),sticker:css('--sticker')};
+ L.polyline(ST.map(s=>s.ll),{color:C.metro,weight:6,opacity:.9}).addTo(lmap);
+ const walls=SITES.filter(s=>!s.zone).sort((a,b)=>a.ll[1]-b.ll[1]);
+ LL.stk=L.polyline(walls.map(s=>s.ll),{color:C.sticker,weight:3,dashArray:'2 9',lineCap:'round'}).addTo(lmap);
+ ST.forEach(s=>L.circleMarker(s.ll,{radius:6,color:C.metro,weight:3,fillColor:C.surface,fillOpacity:1}).bindTooltip(s.n,{permanent:true,direction:'bottom',offset:[0,6],className:'st-tip'}).addTo(lmap));
+ SITES.forEach(s=>{const col=s.zone?C.mural:C.graffiti;const g=L.layerGroup().addTo(lmap);
+  if(s.zone){g.addLayer(L.circle(s.ll,{radius:170,color:col,weight:2,dashArray:'5 6',fillOpacity:.08}))}
+  const m=L.circleMarker(s.ll,{radius:s.zone?6:9,color:s.zone?col:C.surface,weight:2.5,fillColor:s.zone?C.surface:col,fillOpacity:1}).bindTooltip(s.zone?s.n:s.n.replace('Muro frente al ',''),{direction:'top',offset:[0,-8]});
+  m.on('click',()=>selectSite(s.id));g.addLayer(m);LL[s.id]=g});
+ lmap.fitBounds(L.latLngBounds([...ST.map(s=>s.ll),...SITES.map(s=>s.ll)]).pad(.08));
+ svgWrap.hidden=true;leafEl.hidden=false}
+// filters
+let active=new Set(['graffiti','mural','sticker']);
+const fbox=$('#filters');
+MOVES.slice(0,3).forEach(m=>{const b=el('button',{class:'chip','aria-pressed':'true',style:`--c:var(${m.c})`,'data-id':m.id},`<i></i>${m.n}`);b.onclick=()=>{active.has(m.id)?active.delete(m.id):active.add(m.id);applyFilter()};fbox.append(b)});
+function setFilter(id){if(id==='charla'){active=new Set(['graffiti','mural','sticker'])}else active=new Set([id]);applyFilter();
+ document.querySelectorAll('.move').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===id));if(id==='charla')showCharla()}
+function applyFilter(){fbox.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',active.has(b.dataset.id)));
+ SITES.forEach(s=>{const on=s.mv.some(m=>m!=='sticker'&&active.has(m))||(active.has('sticker')&&s.mv.includes('sticker'));s.g.style.opacity=on?1:.15;s.con.style.opacity=on?1:.15;
+  s.stk.setAttribute('opacity',active.has('sticker')&&s.mv.includes('sticker')?1:0)});
+ stickerLine.setAttribute('opacity',active.has('sticker')?1:0);
+ if(lmap){SITES.forEach(s=>{const on=s.mv.some(m=>m!=='sticker'&&active.has(m))||(active.has('sticker')&&s.mv.includes('sticker'));LL[s.id].eachLayer(l=>l.setStyle({opacity:on?1:.15,fillOpacity:on?(l instanceof L.Circle?.08:1):.1}))});LL.stk.setStyle({opacity:active.has('sticker')?1:0})}}
+const panel=$('#site-panel');
+function listHTML(){return `<div class="list-sites">${SITES.map(s=>`<button data-s="${s.id}" style="--c:${colorOf(s)}"><i></i><span>${esc(s.n)}<br><small class="note">${esc(s.z)} · ${esc(s.mun)}</small></span></button>`).join('')}</div>`}
+function overview(){panel.innerHTML=`<p class="eyebrow">Ruta propuesta</p><h3>5 de 10 muros de calle identificados</h3><p class="note">Las 4 fachadas se buscan en edificios visibles desde avenidas principales. Los muros restantes salen del scouting de noviembre, con 6 de reserva. El cierre se hace en el punto más importante al final de la ruta, todavía por definir.</p>${listHTML()}`;bindList()}
+function bindList(){panel.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>selectSite(b.dataset.s))}
+function selectSite(id){const s=SITES.find(x=>x.id===id);SITES.forEach(x=>x.g.classList.toggle('sel',x.id===id));draw();if(lmap&&!leafEl.hidden)lmap.flyTo(s.ll,16,{duration:reduce?0:.8});
+ const stn=stById[s.st].n;const mvs=s.mv.map(m=>MOVES.find(x=>x.id===m)).map(m=>`<span class="badge c" style="--c:var(${m.c})">${m.n}</span>`).join(' ');
+ panel.innerHTML=`<p class="eyebrow">${esc(s.tipo)}</p><h3>${esc(s.n)}</h3><div>${mvs}</div>
+ <dl class="kv"><dt>Zona</dt><dd>${esc(s.z)}</dd><dt>Municipio</dt><dd>${esc(s.mun)}</dd><dt>Estación</dt><dd>${esc(stn)} · Línea 1</dd><dt>Estado</dt><dd>${s.zone?'En búsqueda de edificio y propietario':'Candidato · por confirmar con propietario y alcaldía'}</dd></dl>
+ <p class="note">${s.zone?'Fachada de gran formato pintada en pareja mixta. Se pinta desde el 22 de febrero y se termina en vivo durante el festival.':'Mural de calle con estación de stickers. Se presenta a los vecinos antes de pintar y se pinta del 3 al 6 de marzo.'}</p>
+ <div class="links"><a class="btn" href="${q(s.g)}" target="_blank" rel="noopener">Ver en Google Maps ↗</a><a class="btn" href="${osm(...s.ll)}" target="_blank" rel="noopener">OpenStreetMap ↗</a></div>
+ <button class="chip" id="back-list" style="justify-self:start">← Todos los puntos</button>`;
+ $('#back-list').onclick=()=>{SITES.forEach(x=>x.g.classList.remove('sel'));draw();overview()}}
+function showCharla(){panel.innerHTML=`<p class="eyebrow">Conversaciones</p><h3>La voz de los artistas en toda la ruta</h3><p>Dos conversatorios abiertos durante el festival y una serie registrada en audio y video con los artistas de cada movimiento.</p><dl class="kv"><dt>Viernes 5</dt><dd>Historia del graffiti caraqueño</dd><dt>Sábado 6</dt><dd>Arte urbano y diáspora</dd><dt>Sede</dt><dd>Por definir, cerca del eje de la Línea 1</dd></dl><button class="chip" id="back-list" style="justify-self:start">← Todos los puntos</button>`;$('#back-list').onclick=overview}
+initLeaflet();draw();overview();applyFilter();
+
+/* ---------- cronograma ---------- */
+const D=(m,d)=>new Date(m>=10?2026:2027,m,d);const T0=D(10,1),T1=D(2,31);const pct=d=>(d-T0)/(T1-T0)*100;
+const PH=[
+ {id:'est',n:'Estructura',a:D(10,9),b:D(10,30),weeks:[
+  ['9 al 15 nov','Acuerdo de roles entre la dirección ejecutiva y CMS-Caribes. Un responsable por departamento. Figura jurídica que firma y recibe fondos. Presupuesto preliminar por escenarios.','Comité · Administración · Legal'],
+  ['16 al 22 nov','Consulta de disponibilidad a 21 artistas y 6 suplentes. Scouting de 14 muros y 6 de reserva. Mapa de actores en Chacao, Sucre y Libertador. Dossier de patrocinio.','Curaduría · Producción · Comunidades · Estrategia'],
+  ['23 al 29 nov','Reuniones con alcaldías y propietarios. Cotizaciones de andamios, grúas, pintura y seguros. Revisión de documentos de viaje de los 13 artistas que vienen de fuera.','Legal · Producción · Logística']]},
+ {id:'cie',n:'Cierre de estructuras',a:D(10,30),b:D(11,18),weeks:[
+  ['30 nov al 6 dic','Confirmación escrita de artistas. Cartas de intención de las cuatro fachadas. Tres escenarios de presupuesto. Convocatorias de artistas jóvenes y de stickers.','Curaduría · Legal · Administración · Estrategia'],
+  ['7 al 13 dic','Plan de comunicaciones. Plan logístico con vuelos cotizados. Plan de seguridad preliminar. Negociación con patrocinador principal.','Estrategia · Logística · Seguridad · Comité'],
+  ['14 al 18 dic','Decisión de seguir o no con el festival.','Comité']]},
+ {id:'rec',n:'Receso',a:D(11,19),b:D(0,3),rest:1,weeks:[['19 dic al 3 ene','Receso de fin de año. Solo seguimiento de patrocinio y de compras con fecha límite.','Comité · Logística']]},
+ {id:'pre',n:'Preproducción',a:D(0,4),b:D(0,29),weeks:[
+  ['4 al 10 ene','Contratos a artistas. Permisos municipales. Compra de vuelos. Pedido de pintura y aerosoles.','Legal · Logística · Producción'],
+  ['11 al 17 ene','Bocetos. Andamios, grúas y seguros contratados. Alojamiento reservado.','Curaduría · Producción · Seguridad · Logística'],
+  ['18 al 24 ene','Aprobación de bocetos. Lanzamiento público. Programa definido. Plan de cobertura audiovisual.','Curaduría · Estrategia · Comunidades · Registro'],
+  ['25 al 29 ene','Preproducción cerrada.','Comité']]},
+ {id:'pro',n:'Producción',a:D(1,1),b:D(1,21),weeks:[
+  ['1 al 7 feb','Presentación de bocetos a vecinos. Revelación semanal de artistas. Inscripciones a talleres.','Comunidades · Producción · Estrategia'],
+  ['8 al 14 feb','Carnaval (8 y 9). Materiales en almacén. Acreditaciones. Equipo operativo contratado.','Producción · Administración'],
+  ['15 al 20 feb','Preparación de fachadas: andamios, limpieza, imprimación y cuadrícula. Timelapse instalado. Simulacro de emergencia.','Producción · Seguridad · Registro']]},
+ {id:'eje',n:'Pintura y festival',a:D(1,22),b:D(2,7),hot:1,weeks:[
+  ['22 feb al 4 mar','Pintura de fachadas. Meta: 90% el jueves 4.','Producción · Seguridad · Registro'],
+  ['1 al 4 mar','Preparación e inicio de murales de calle. Control de avance de fachadas el miércoles 3.','Producción · Curaduría'],
+  ['5 al 7 mar','Festival abierto al público. Las obras se terminan en vivo. Domingo: recorrido y cierre tranquilo con DJ e intercambio de stickers.','Todos']]},
+ {id:'fin',n:'Cierre',a:D(2,8),b:D(2,19),weeks:[['8 al 19 mar','Desmontaje, pagos, mapa de la ruta, memoria e informe a patrocinadores, antes de Semana Santa.','Administración · Estrategia · Producción']]}];
+const GATES=[['G1',D(10,30),'Estructura','Equipo completo, figura jurídica definida, presupuesto preliminar, lista corta de muros y artistas.'],
+ ['G2',D(11,18),'Seguir o no','Fecha fija, cuatro fachadas con carta de intención, al menos 70% de los artistas confirmados y financiamiento asegurado para el escenario mínimo.'],
+ ['G3',D(0,29),'Preproducción cerrada','Contratos, bocetos, vuelos, permisos y seguros.'],
+ ['G4',D(1,19),'Listo para pintar','Materiales, andamios, plan de seguridad aprobado y vecinos informados.'],
+ ['G5',D(2,19),'Cierre','Pagos, memoria e informe a patrocinadores.']];
+const phBox=$('#phases'),gBox=$('#gates'),det=$('#tl-detail');
+PH.forEach(p=>{const b=el('button',{class:'phase'+(p.hot?' hot':'')+(p.rest?' rest':''),'aria-pressed':'false',style:`left:${pct(p.a)}%;width:calc(${pct(p.b)-pct(p.a)}% - 3px)`,title:p.n},p.n);b.onclick=()=>showPhase(p.id);p.b_=b;phBox.append(b)});
+GATES.forEach(g=>{const b=el('button',{class:'gate','aria-pressed':'false',style:`left:${pct(g[1])}%`},g[0]);b.onclick=()=>showGate(g[0]);g.b=b;gBox.append(b)});
+function clearTL(){PH.forEach(p=>p.b_.setAttribute('aria-pressed','false'));GATES.forEach(g=>g.b.setAttribute('aria-pressed','false'))}
+const fmt=d=>d.toLocaleDateString('es',{day:'numeric',month:'long'});
+function showPhase(id){clearTL();const p=PH.find(x=>x.id===id);p.b_.setAttribute('aria-pressed','true');
+ det.innerHTML=`<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><h3>${p.n}</h3><span class="note">${fmt(p.a)} al ${fmt(p.b)}</span></div>`+p.weeks.map(w=>`<div class="week"><b>${w[0]}</b><div>${w[1]}<div class="areas">${w[2]}</div></div></div>`).join('')}
+function showGate(id){clearTL();const g=GATES.find(x=>x[0]===id);g.b.setAttribute('aria-pressed','true');
+ det.innerHTML=`<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><h3>${g[0]} · ${g[2]}</h3><span class="note">${fmt(g[1])}</span></div><div class="week"><b>Se cumple si</b><div>${g[3]}</div></div>`}
+showPhase('eje');
+
+/* ---------- calendario de pintura ---------- */
+const DAYS=[];for(let i=0;i<21;i++){const d=new Date(2027,1,15+i);DAYS.push(d)}
+const wd=['D','L','M','X','J','V','S'];
+const fach=i=>{if(i<6)return['prep',0];if(i===6)return['',0];if(i<=17)return['work',Math.round(5+(i-7)*(85/10))];if(i===18)return['live',95];if(i===19)return['live',100];return['',100]};
+const calle=i=>{if(i<14)return['',0];if(i<16)return['prep',0];if(i<18)return['work',(i-15)*25];if(i<20)return['live',(i-15)*25];return['',100]};
+const pub=i=>i>=18?['live']:[''];
+const NOTE=[
+ 'Instalación de andamios y grúas en las cuatro fachadas.','Limpieza y reparación de muros.','Imprimación de fachadas.','Trazado de cuadrículas.','Simulacro de emergencia. Listo para pintar (G4).','Instalación de cámaras de timelapse. Llegan artistas de fachada.','Llegan artistas de fachada. Descanso.',
+ 'Primer día de pintura en fachadas.','Pintura de fachadas.','Pintura de fachadas.','Pintura de fachadas.','Pintura de fachadas.','Pintura de fachadas.','Pintura de fachadas. Llegan artistas de calle.',
+ 'Fachadas en curso. Preparación de muros de calle.','Fachadas en curso. Fondos en muros de calle.','Control de avance: fachadas al 70% o versión reducida. Empiezan los murales de calle.','Fachadas al 90%. Montaje de estaciones de stickers.',
+ 'Festival día 1: inauguración, talleres, conversación sobre la historia del graffiti caraqueño.','Festival día 2: se terminan fachadas y murales de calle. Jornada de stickers. Primer recorrido.','Festival día 3: sin pintura. Recorrido completo y cierre al atardecer con DJ e intercambio de stickers en el último punto de la ruta.'];
+const days=$('#days');
+days.append(el('span'));DAYS.forEach((d,i)=>{const h=el('span',{class:'hd','data-i':i},`${wd[d.getDay()]}<br>${d.getDate()}`);h.onclick=()=>setDay(i);days.append(h)});
+[['Fachadas','--mural',fach],['Murales de calle','--graffiti',calle],['Público','--charla',pub]].forEach(([n,c,f])=>{days.append(el('span',{class:'lab'},n));DAYS.forEach((d,i)=>{const cell=el('span',{class:'c '+f(i)[0],style:`--c:var(${c})`,'data-i':i,title:`${d.getDate()}/${d.getMonth()+1}`});cell.onclick=()=>setDay(i);days.append(cell)})});
+const rng=$('#day-range');rng.oninput=()=>setDay(+rng.value);
+function setDay(i){rng.value=i;days.querySelectorAll('[data-i]').forEach(e=>e.classList.toggle('sel',+e.dataset.i===i));
+ const d=DAYS[i];const f=fach(i)[1],c=calle(i)[1];
+ $('#day-read').innerHTML=`<div><div class="day-title">${d.toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'})}</div><p class="note" style="margin-top:4px">${NOTE[i]}</p></div>
+ <div class="meter" style="--c:var(--mural)"><span>Fachadas · ${f}%</span><div class="bar"><span style="width:${f}%"></span></div></div>
+ <div class="meter" style="--c:var(--graffiti)"><span>Murales de calle · ${c}%</span><div class="bar"><span style="width:${c}%"></span></div></div>`}
+setDay(17);
+
+/* ---------- programa ---------- */
+const PROG=[
+ {d:'Viernes 5',s:'Día 1 · apertura',items:[['10:00','Pintura en fachadas y murales de calle, abierta al público','--graffiti'],['11:00','Talleres de graffiti y dibujo de letras para jóvenes','--sticker'],['17:00','Conversación: historia del graffiti caraqueño','--charla'],['19:00','Inauguración y presentación de los artistas','--mural']]},
+ {d:'Sábado 6',s:'Día 2 · se terminan las obras',items:[['09:00','Último tramo de las fachadas, en vivo','--mural'],['10:00','Jornada de stickers en las estaciones de la ruta','--sticker'],['15:00','Conversación: arte urbano y diáspora','--charla'],['17:00','Primer recorrido guiado','--graffiti']]},
+ {d:'Domingo 7',s:'Día 3 · la ruta completa',items:[['10:00','Recorrido completo por las 14 obras, siguiendo la Línea 1','--graffiti'],['17:00','Cierre al atardecer: DJ en el punto más importante al final de la ruta e intercambio de stickers. Una velada tranquila. Lugar por definir.','--sticker']]}];
+const tabs=$('#tabs'),prog=$('#prog');
+PROG.forEach((p,i)=>{const b=el('button',{role:'tab','aria-selected':i===0},`${p.d}<small>${p.s}</small>`);b.onclick=()=>showProg(i);tabs.append(b)});
+function showProg(i){[...tabs.children].forEach((b,j)=>b.setAttribute('aria-selected',i===j));prog.innerHTML=PROG[i].items.map(x=>`<div class="slot" style="--c:var(${x[2]})"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')+`<p class="note">Horarios tentativos.</p>`}
+showProg(0);
+
+/* ---------- merch ---------- */
+const MERCH=[
+ {id:'tote',n:'Tote bag',sc:'Edición por artista · tela cruda',t:'Bolsa de tela con una obra del festival impresa. Una edición corta por artista de fachada.',
+  d:'Se diseña con los artistas de fachada y se vende en el punto de cierre y en línea. Parte de cada venta vuelve al artista.',
+  svg:'<rect width="220" height="150" fill="var(--soft)"/><path d="M80 40 q30 -32 60 0" fill="none" stroke="var(--ink)" stroke-width="5"/><rect x="62" y="44" width="96" height="92" rx="4" fill="#EFE7D6" stroke="var(--ink)" stroke-width="2"/><rect x="74" y="58" width="72" height="44" fill="var(--l5)"/><circle cx="96" cy="80" r="12" fill="var(--l4)"/><path d="M74 102 l26-22 l20 14 l26-20 v28z" fill="var(--l3)"/><text x="110" y="122" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="var(--ink)">CARIBE CARACAS 2027</text>'},
+ {id:'stk',n:'Pack de stickers',sc:'Selección de la convocatoria',t:'Sobre con stickers de la convocatoria abierta, incluidos los enviados por la diáspora.',
+  d:'Se arma con piezas de la convocatoria de stickers. Es la puerta de entrada más económica y la que más circula por la ciudad.',
+  svg:'<rect width="220" height="150" fill="var(--soft)"/><g transform="rotate(-10 110 75)"><rect x="60" y="34" width="100" height="80" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/></g><circle cx="88" cy="66" r="20" fill="var(--l4)"/><rect x="110" y="52" width="40" height="30" rx="4" fill="var(--l1)" transform="rotate(8 130 67)"/><rect x="92" y="86" width="44" height="20" rx="10" fill="var(--l2)"/><text x="114" y="100" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="9" fill="#fff">CCS</text>'},
+ {id:'fra',n:'Franela',sc:'Edición del festival · algodón',t:'Franela con la identidad del festival y el mapa de la ruta sobre la Línea 1.',
+  d:'Una versión para el equipo y voluntarios, que los identifica en la calle, y otra a la venta para el público.',
+  svg:'<rect width="220" height="150" fill="var(--soft)"/><path d="M80 30 l-30 16 l12 24 l14-6 v62 h68 v-62 l14 6 l12-24 l-30-16 q-15 14 -30 0z" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/><path d="M86 82 h48" stroke="var(--l1)" stroke-width="5" stroke-linecap="round"/><circle cx="86" cy="82" r="4" fill="var(--surface)" stroke="var(--l1)" stroke-width="2"/><circle cx="110" cy="82" r="4" fill="var(--surface)" stroke="var(--l1)" stroke-width="2"/><circle cx="134" cy="82" r="4" fill="var(--surface)" stroke="var(--l1)" stroke-width="2"/><text x="110" y="104" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="9" fill="var(--ink)">CARACAS HABLA</text>'},
+ {id:'lib',n:'Libreta de ruta',sc:'14 páginas · una por obra',t:'Libreta tipo boleto para coleccionar las firmas de los artistas en cada muro.',
+  d:'Se entrega o se vende al inicio del recorrido. Cada artista firma su página en el muro, y la libreta completa queda como registro personal de la ruta.',
+  svg:'<rect width="220" height="150" fill="var(--soft)"/><rect x="62" y="22" width="96" height="112" rx="6" fill="var(--l1)"/><rect x="62" y="114" width="96" height="20" fill="var(--stripe)"/><circle cx="82" cy="44" r="9" fill="none" stroke="#fff" stroke-width="2"/><text x="82" y="48" text-anchor="middle" font-family="Archivo,Arial" font-weight="800" font-size="10" fill="#fff">1</text><text x="110" y="78" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="11" fill="#fff">LIBRETA</text><text x="110" y="92" text-anchor="middle" font-family="Archivo,Arial" font-weight="900" font-size="11" fill="#fff">DE RUTA</text>'}];
+const mg=$('#merch-grid'),md=$('#merch-detail');
+MERCH.forEach(m=>{const b=el('button',{class:'mi','aria-pressed':'false','data-m':m.id},`<svg viewBox="0 0 220 150" aria-hidden="true">${m.svg}</svg><h3>${m.n}</h3><span class="scale">${m.sc}</span><p>${m.t}</p>`);b.onclick=()=>showMerch(m.id);mg.append(b)});
+function showMerch(id){const m=MERCH.find(x=>x.id===id);mg.querySelectorAll('.mi').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===id));md.innerHTML=`<p class="eyebrow">Cómo funciona</p><h3>${m.n}</h3><p>${m.d}</p><p class="note">Diseño, cantidades y precios por definir con los artistas y el presupuesto.</p>`}
+showMerch('lib');
+const OBRAS=[['Sabana Grande','--l3'],['Centro Lido','--l3'],['Sambil','--l3'],['San Ignacio','--l3'],['Parque Miranda','--l3'],['Fachada A','--l5'],['Fachada B','--l5'],['Fachada C','--l5'],['Fachada D','--l5'],['Muro 6','--l3'],['Muro 7','--l3'],['Muro 8','--l3'],['Muro 9','--l3'],['Muro 10','--l3']];
+const pg=$('#pages');let sig=new Set([0,5]);
+function renderPages(){pg.innerHTML='';OBRAS.forEach(([n,c],i)=>{const b=el('button',{class:'slot-f'+(sig.has(i)?' on':''),style:`--c:var(${c})`,'aria-pressed':sig.has(i)},`<span><b>Pág. ${String(i+1).padStart(2,'0')}</b>${n}</span>`);b.onclick=()=>{sig.has(i)?sig.delete(i):sig.add(i);renderPages()};pg.append(b)});$('#sig-count').textContent=sig.size}
+renderPages();
+
+/* ---------- organigrama ---------- */
+const ORG={top:{id:'com',n:'Comité de dirección',s:'Dirección ejecutiva + CMS-Caribes',pre:2,pro:2,roles:['Dirección ejecutiva','Dirección artística (CMS-Caribes)'],add:['Vocería única durante el festival'],ent:'Presupuesto aprobado, decisiones de seguir o no, acuerdo con patrocinador principal.'},
+ dirs:[{id:'art',n:'Dirección artística',s:'CMS-Caribes',deps:[
+   {id:'cur',n:'Curaduría y artistas',pre:2,pro:8,roles:['Curador/a (CMS-Caribes)','Coordinador/a de artistas'],add:['2 enlaces de artistas','4 asistentes de fachada'],ent:'Lista de 21 artistas y suplentes, cartas de invitación, bocetos aprobados, ficha técnica por obra.'},
+   {id:'com2',n:'Comunidades y programa público',pre:1,pro:8,roles:['Coordinador/a de comunidades'],add:['4 facilitadores de talleres','1 moderador/a','3 guías del barrio'],ent:'Mapa de actores por muro, presentación a vecinos, programa público, autorizaciones de menores.'}]},
+  {id:'eje',n:'Dirección ejecutiva y de producción',s:'Coordina las áreas operativas',deps:[
+   {id:'pt',n:'Producción técnica',pre:2,pro:20,roles:['Jefe/a de producción técnica','Productor/a de muros'],add:['6 jefes de sitio','10 asistentes de pintura','2 en almacén','2 de montaje'],ent:'Ficha por muro, plan de materiales, contratos de andamios y grúas, montaje del cierre.'},
+   {id:'log',n:'Logística',pre:1,pro:7,roles:['Coordinador/a de viajes y alojamiento'],add:['4 choferes','1 hospitalidad','1 comidas e hidratación'],ent:'Matriz de viajeros, rooming list, plan diario de transporte, viáticos.'},
+   {id:'seg',n:'Seguridad',pre:2,pro:10,roles:['Jefe/a de seguridad','Asesor/a de trabajo en altura'],add:['Personal por sitio','Enlace con policía municipal','Paramédicos en el cierre'],ent:'Análisis de riesgo por sitio, plan de seguridad, protocolo de emergencias, seguros.'},
+   {id:'est',n:'Estrategia y comunicaciones',pre:4,pro:7,roles:['Estratega','Alianzas y patrocinio','Diseño','Community manager'],add:['2 de prensa y acreditaciones','1 de redes en vivo'],ent:'Plan de comunicaciones, dossier de patrocinio, identidad, kit de prensa, protocolo de crisis.'},
+   {id:'reg',n:'Registro audiovisual',pre:1,pro:10,roles:['Director/a de registro'],add:['3 fotógrafos','3 camarógrafos','1 operador/a de dron','1 gestor/a de material','1 editor/a'],ent:'Plan de cobertura, timelapse de cada fachada, banco oficial de fotos y video, video resumen.'},
+   {id:'adm',n:'Administración y finanzas',pre:1,pro:2,roles:['Administrador/a'],add:['Pagos en sitio y caja chica'],ent:'Presupuesto por escenarios, flujo de caja, política de pagos, rendición a patrocinadores.'},
+   {id:'leg',n:'Legal y permisos',pre:2,pro:1,roles:['Asesor/a legal externo','Gestor/a de permisos'],add:[],ent:'Contratos, acuerdos de permanencia, permisos municipales, cesiones de imagen.',proRoles:['Guardia legal disponible']}]}]};
+let phase='pre',selOrg='com';
+const allDeps=[ORG.top,...ORG.dirs.flatMap(d=>d.deps)];
+const orgBox=$('#org'),orgPanel=$('#org-panel');
+function node(d,cls=''){const b=el('button',{class:'node '+cls,'aria-pressed':selOrg===d.id,'data-o':d.id},`<span class="n">${d[phase]}</span><b>${d.n}</b>${d.s?`<small>${d.s}</small>`:''}`);b.onclick=()=>{selOrg=d.id;renderOrg()};return b}
+function renderOrg(){orgBox.innerHTML='';const l1=el('div',{class:'lvl'});l1.append(node(ORG.top,'top'));orgBox.append(l1);
+ const br=el('div',{class:'branches'});ORG.dirs.forEach(d=>{const col=el('div',{class:'branch'});const h=el('div',{class:'lvl'});h.append(el('div',{class:'node dir',style:'cursor:default'},`<b>${d.n}</b><small>${d.s}</small>`));col.append(h);
+  const g=el('div',{class:'deps'});d.deps.forEach(x=>g.append(node(x)));col.append(g);br.append(col)});orgBox.append(br);
+ const total=allDeps.reduce((a,d)=>a+d[phase],0);animateCount(total);
+ const d=allDeps.find(x=>x.id===selOrg);const roles=phase==='pre'?d.roles:[...d.roles.map(r=>r),...(d.proRoles||d.add.map(a=>'+ '+a))];
+ orgPanel.innerHTML=`<p class="eyebrow">${phase==='pre'?'Preproducción · nov a ene':'Producción · feb a mar'}</p><h3>${d.n}</h3><p><span class="count" style="font-size:28px">${d[phase]}</span> <span class="note">${d[phase]===1?'persona':'personas'}</span></p>
+ <div><p class="eyebrow" style="margin-bottom:6px">Equipo</p>${roles.map(r=>`<div style="padding:5px 0;border-bottom:1px solid var(--soft);font-size:14px">${esc(r)}</div>`).join('')}</div>
+ <div><p class="eyebrow" style="margin-bottom:6px">Entregables clave</p><p style="font-size:14px">${esc(d.ent)}</p></div>`}
+let shown=18;function animateCount(to){const c=$('#org-count');const f=shown;shown=to;if(reduce){c.textContent=to;return}const t0=performance.now();const st=t=>{const k=Math.min(1,(t-t0)/500);c.textContent=Math.round(f+(to-f)*k);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)}
+$('#ph-pre').onclick=()=>{phase='pre';$('#ph-pre').setAttribute('aria-pressed','true');$('#ph-pro').setAttribute('aria-pressed','false');renderOrg()};
+$('#ph-pro').onclick=()=>{phase='pro';$('#ph-pro').setAttribute('aria-pressed','true');$('#ph-pre').setAttribute('aria-pressed','false');renderOrg()};
+renderOrg();
+
+/* ---------- riesgos ---------- */
+const RISKS=[
+ ['Permisos que cambian con las autoridades','Acuerdos firmados con propietarios y no solo con alcaldías, con plazo mínimo de permanencia y aviso previo antes de borrar una obra.'],
+ ['Viajes de artistas de fuera','Revisión de pasaportes y visas en noviembre, rutas aéreas mapeadas por país y compra en enero con tarifa flexible.'],
+ ['Retrasos en las fachadas','Once días de pintura con dos de margen, control de avance el 3 de marzo y una versión reducida del diseño acordada con cada pareja.'],
+ ['Rechazo de los vecinos','Cada boceto se presenta antes de pintar, con margen para ajustarlo y seis muros de reserva.'],
+ ['Dependencia de un solo patrocinador','Tres escenarios de alcance. El escenario mínimo, con murales de calle, stickers y conversaciones, se hace aunque falte el patrocinador principal.'],
+ ['Lectura política del festival','Política de neutralidad escrita, aliados de distinto tipo y vocería única del comité.']];
+$('#risks').innerHTML=RISKS.map(r=>`<details><summary>${r[0]}</summary><p>${r[1]}</p></details>`).join('');
+
+/* ---------- solicitud (Netlify Forms) ---------- */
+const form=$('#req-form'),note=$('#f-note'),myStatus=$('#my-status');
+form.addEventListener('submit',async e=>{e.preventDefault();
+ const v=k=>form.elements[k].value.trim();
+ if(!v('nombre')||!v('organizacion')||!v('perfil')||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('correo'))){note.textContent='Completa nombre, un correo válido, organización e interés.';return}
+ const btn=$('#f-send');btn.disabled=true;btn.textContent='Enviando…';
+ try{const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form)).toString()});
+  if(!r.ok)throw new Error(r.status);
+  myStatus.innerHTML=`<div class="status ok" style="margin-top:12px"><b>Solicitud recibida.</b> La revisamos y, si se aprueba, te enviamos el deck a ${esc(v('correo'))}.</div>`;
+  form.reset();note.textContent='Gracias. Puedes cerrar esta página.';btn.textContent='Solicitud enviada'}
+ catch(err){note.textContent='No se pudo enviar la solicitud. Revisa tu conexión e inténtalo otra vez.';btn.disabled=false;btn.textContent='Enviar solicitud'}});
+
+/* nav activo */
+const links=[...document.querySelectorAll('nav.top a[href^="#"]:not(.cta)')];
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-40% 0px -55% 0px'});
+document.querySelectorAll('section[id]').forEach(s=>io.observe(s));
+})();
+</script>
+</body>
+</html>
