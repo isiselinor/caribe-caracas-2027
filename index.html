@@ -78,7 +78,8 @@ nav.top .wrap{display:flex;align-items:center;gap:18px;padding-block:10px;overfl
 nav.top .brand{font-family:var(--f-display);font-weight:800;white-space:nowrap}
 nav.top a{text-decoration:none;font-size:14px;color:var(--muted);white-space:nowrap;padding:4px 2px;border-bottom:2px solid transparent}
 nav.top a.on{color:var(--ink);border-color:var(--ink)}
-nav.top .cta{margin-left:auto;background:var(--ink);color:var(--bg);padding:6px 12px;border-radius:999px;border:none}
+nav.top .lang{margin-left:auto;border:1.5px solid var(--ink);background:none;border-radius:999px;padding:4px 10px;font-family:var(--f-mono);font-size:12px;font-weight:500;white-space:nowrap}
+nav.top .cta{background:var(--ink);color:var(--bg);padding:6px 12px;border-radius:999px;border:none}
 
 /* hero */
 .hero{padding-block:48px 40px;display:grid;gap:28px;overflow-x:clip}
@@ -220,6 +221,28 @@ input[type=range]{width:100%;accent-color:var(--l1)}
 .slot-f b{font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;display:block}
 .slot-f.on{border-style:solid;border-color:var(--c);color:var(--ink)}
 .slot-f.on::after{content:"FIRMADO";position:absolute;inset:auto 8px 10px;transform:rotate(-12deg);border:2px solid var(--c);color:var(--c);font-family:var(--f-display);font-weight:900;font-size:11px;letter-spacing:.08em;border-radius:4px;padding:1px 0}
+.impact{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.impact div{background:var(--surface);min-width:0;padding:18px;display:grid;gap:6px;align-content:start}
+.impact b{font-family:var(--f-display);font-stretch:115%;font-size:40px;font-weight:900;line-height:1;color:var(--c,var(--ink));font-variant-numeric:tabular-nums}
+.impact span{font-weight:600}.impact small{font-size:13px;color:var(--muted)}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.tier{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:8px;padding:16px;display:grid;gap:10px;align-content:start}
+.tier dl{display:grid;gap:4px;margin:0;font-size:14.5px}.tier dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}.tier dd{margin:0}
+.calc{margin-top:22px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.calc{grid-template-columns:1fr}}
+.allies{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 16px}
+.ally{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--soft);cursor:pointer;font-weight:400}
+.ally:last-child{border-bottom:none}
+.ally input{width:20px;height:20px;accent-color:var(--l2);margin:0}
+.ally small{display:block;color:var(--muted);font-size:12.5px}
+.ally b{font-family:var(--f-mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.result{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:grid;gap:12px;position:sticky;top:70px}
+.result .big{font-family:var(--f-display);font-stretch:115%;font-size:38px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.stack{height:14px;border-radius:7px;background:var(--soft);overflow:hidden;display:flex}
+.stack span{display:block;height:100%;transition:width .4s}
+.kv2{display:grid;grid-template-columns:1fr auto;gap:6px;font-size:14px}.kv2 b{font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-weight:500}
+@media (max-width:820px){.impact{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.impact{grid-template-columns:1fr}}
 /* riesgos */
 .risks{display:grid;gap:8px}
 details{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px}
@@ -264,8 +287,11 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:13px;c
     <a href="#cronograma">Cronograma</a>
     <a href="#programa">Programa</a>
     <a href="#merch">Merch</a>
+    <a href="#impacto">Impacto</a>
     <a href="#equipo">Equipo</a>
     <a href="#riesgos">Riesgos</a>
+    <a href="#sumarte">Sumarte</a>
+    <button class="lang" id="lang" type="button" aria-label="Change language to English">EN</button>
     <a class="cta" href="#deck">Solicitar el deck</a>
   </div>
 </nav>
@@ -405,6 +431,27 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:13px;c
   </div>
 </section>
 
+<section id="impacto">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l5)"><i>★</i>Impacto esperado</p>
+      <h2>Lo que queda después de los tres días</h2>
+      <p class="lede">El festival dura un fin de semana, pero sus obras, su ruta y su archivo se quedan en la ciudad. Estas son las metas del proyecto.</p>
+    </div>
+    <div class="impact">
+      <div style="--c:var(--l1)"><b>14</b><span>obras permanentes</span><small>4 fachadas de gran formato y 10 murales de calle</small></div>
+      <div style="--c:var(--l2)"><b>2</b><span>zonas de intervención</span><small>La Candelaria y La Carlota, en los extremos de la ruta</small></div>
+      <div style="--c:var(--l3)"><b>8</b><span>artistas de la diáspora vuelven</span><small>a pintar en su ciudad, junto a 8 locales y 5 invitados de la región</small></div>
+      <div style="--c:var(--l4)"><b>60</b><span>jóvenes en talleres</span><small>de graffiti y dibujo de letras, de las zonas donde se pinta</small></div>
+      <div style="--c:var(--l5)"><b>80+</b><span>personas trabajando</span><small>en la producción, la mayoría de Caracas, sin contar proveedores</small></div>
+      <div style="--c:var(--l1)"><b>1</b><span>ruta permanente</span><small>con placas QR en cada obra, para visitarla después del festival</small></div>
+      <div style="--c:var(--l2)"><b>3</b><span>municipios</span><small>Libertador, Chacao y Sucre</small></div>
+      <div style="--c:var(--l3)"><b>4</b><span>timelapses y un archivo</span><small>de cada fachada, más la serie de conversaciones con los artistas</small></div>
+    </div>
+    <p class="note" style="margin-top:10px">Metas estimadas, sujetas al escenario de presupuesto.</p>
+  </div>
+</section>
+
 <section id="equipo">
   <div class="wrap">
     <div class="sec-head">
@@ -436,10 +483,25 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:13px;c
   </div>
 </section>
 
+<section id="sumarte">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow ln" style="--c:var(--l1)"><i>7</i>Cómo sumarte</p>
+      <h2>Aliados que hacen viable el festival</h2>
+      <p class="lede">Cada aliado que aporta en especie reduce lo que hay que conseguir en dinero. Marca los aliados para ver cómo baja el costo del festival.</p>
+    </div>
+    <div class="tiers" id="tiers"></div>
+    <div class="calc">
+      <div class="allies" id="allies"></div>
+      <aside class="result" id="result" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
 <section id="deck">
   <div class="wrap req">
     <div class="sec-head" style="margin:0">
-      <p class="eyebrow ln" style="--c:var(--l2)"><i>7</i>Siguiente paso</p>
+      <p class="eyebrow ln" style="--c:var(--l2)"><i>8</i>Siguiente paso</p>
       <h2>Solicita el deck completo</h2>
       <p class="lede">El deck incluye el detalle de producción, los escenarios de presupuesto y las oportunidades de alianza. Cada solicitud se revisa y, una vez aprobada, el deck se envía al correo indicado.</p>
       <div id="my-status"></div>
@@ -730,6 +792,36 @@ const OBRAS=[['La Candelaria','--l2'],['Fachada A','--l5'],['Sabana Grande','--l
 const pg=$('#pages');let sig=new Set([0,1]);
 function renderPages(){pg.innerHTML='';OBRAS.forEach(([n,c],i)=>{const b=el('button',{class:'slot-f'+(sig.has(i)?' on':''),style:`--c:var(${c})`,'aria-pressed':sig.has(i)},`<span><b>Pág. ${String(i+1).padStart(2,'0')}</b>${n}</span>`);b.onclick=()=>{sig.has(i)?sig.delete(i):sig.add(i);renderPages()};pg.append(b)});$('#sig-count').textContent=sig.size}
 renderPages();
+
+/* ---------- cómo sumarte ---------- */
+const TIERS=[
+ {n:'Patrocinador principal',c:'--l1',a:'Dinero para honorarios de artistas y producción.',r:'El festival lleva su nombre ("Caribe Caracas 2027 con…"). Logo en el boleto, el mapa, la libreta y la franela. Una fachada dedicada con su nombre en la placa. Presencia en el cierre y en el video resumen.'},
+ {n:'Aliados en especie',c:'--l2',a:'Producto o servicio: pintura, hotel, vuelos, grúas, transporte, comida o equipos.',r:'Logo en el mapa de la ruta y en la libreta. Mención en redes y prensa. Registro audiovisual de su aporte.'},
+ {n:'Aliados institucionales',c:'--l3',a:'Permisos, seguridad, espacios y difusión.',r:'Participación en la inauguración. Obras permanentes en su territorio. Informe de impacto al cierre.'},
+ {n:'Medios aliados',c:'--l4',a:'Pauta y cobertura.',r:'Acceso a los artistas, contenido del registro audiovisual y acreditación de prensa.'}];
+$('#tiers').innerHTML=TIERS.map(t=>`<div class="tier" style="--c:var(${t.c})"><h3>${t.n}</h3><dl><dt>Aporta</dt><dd>${t.a}</dd><dt>Recibe</dt><dd>${t.r}</dd></dl></div>`).join('');
+const ALLIES=[
+ ['Marca de pintura y aerosoles','Pintura, imprimación y aerosoles',21800,1],
+ ['Empresa de grúas y andamios','Alquiler de grúas y andamios',14080,0],
+ ['Aerolínea','Vuelos de artistas de fuera',13200,0],
+ ['Hotel','Alojamiento de artistas',11600,1],
+ ['Marca de alimentos y bebidas','Comidas e hidratación en jornada',8500,0],
+ ['Empresa de transporte','Vans y combustible',8350,0],
+ ['Alcaldías','Permisos, ocupación de vía y seguridad municipal',6050,0],
+ ['Medios aliados','Pauta digital e impresos',4600,0],
+ ['Productora o marca de equipos','Equipos de foto, video y timelapse',3400,0]];
+const SUB=266340,MULT=1.15,BASE=Math.round(SUB*MULT);
+const usd=n=>'USD '+Math.round(n).toLocaleString('es-VE');
+const al=$('#allies');
+ALLIES.forEach(([n,c,v,on],i)=>{const l=el('label',{class:'ally',for:'al'+i},`<input type="checkbox" id="al${i}" ${on?'checked':''}><span>${n}<small>${c}</small></span><b>${usd(v)}</b>`);al.append(l)});
+al.addEventListener('change',calc);
+function calc(){const cov=ALLIES.reduce((a,x,i)=>a+($('#al'+i).checked?x[2]:0),0);const tot=(SUB-cov)*MULT;const saved=BASE-tot;const pct=saved/BASE;
+ $('#result').innerHTML=`<p class="eyebrow">Costo en dinero del festival completo</p><div class="big">${usd(tot)}</div>
+ <div class="stack" aria-hidden="true"><span style="width:${(1-pct)*100}%;background:var(--l1)"></span><span style="width:${pct*100}%;background:var(--l2)"></span></div>
+ <div class="kv2"><span>Costo estimado sin aliados</span><b>${usd(BASE)}</b><span>Cubierto por aliados en especie</span><b>${usd(saved)}</b><span>Reducción</span><b>${(pct*100).toFixed(1).replace('.',',')}%</b></div>
+ <p class="note">Punto medio del escenario A. Cada aporte en especie también reduce el fee de producción y los imprevistos.</p>
+ <a class="btn solid" href="#deck" style="justify-self:start">Quiero sumarme</a>`}
+calc();
 
 /* ---------- organigrama ---------- */
 const ORG={top:{id:'com',n:'Comité de dirección',s:'Dirección ejecutiva + CMS-Caribes',pre:2,pro:2,roles:['Dirección ejecutiva','Dirección artística (CMS-Caribes)'],add:['Vocería única durante el festival'],ent:'Presupuesto aprobado, decisiones de seguir o no, acuerdo con patrocinador principal.'},
