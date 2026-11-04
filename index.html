@@ -868,7 +868,7 @@ $('#risks').innerHTML=RISKS.map(r=>`<details><summary>${r[0]}</summary><p>${r[1]
 
 /* ---------- solicitud (Google Apps Script) ---------- */
 // Pega aquí la URL de la aplicación web de Apps Script (termina en /exec)
-const SCRIPT_URL='';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwMn70RDM37NukasXiq5jb64otsw73KeCNxm12-Pd6yYfALS2GEsvXCL4AoWueEI_0lXw/exec';
 const form=$('#req-form'),note=$('#f-note'),myStatus=$('#my-status');
 form.addEventListener('submit',async e=>{e.preventDefault();
  const v=k=>form.elements[k].value.trim();
