@@ -14,6 +14,8 @@
 .leaflet-tooltip.st-tip{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none;font-family:var(--f-mono);font-size:11px;padding:1px 5px}
 .leaflet-tooltip.st-tip::before{display:none}
 .leaflet-container{font-family:var(--f-body)}
+.leaflet-tile-pane{filter:grayscale(1) contrast(.92) brightness(1.04)}
+@media (prefers-color-scheme: dark){.leaflet-tile-pane{filter:grayscale(1) invert(1) brightness(.85) contrast(.9)}}
 /* Layout: una sola columna editorial; cada sección es una herramienta para recorrer (mapa, cronograma, organigrama) con panel de detalle al lado. */
 :root{
   /* Paleta de las líneas del Metro de Caracas: L1 roja, L2 verde, L3 azul, L4 amarilla, L5 morada */
@@ -589,12 +591,12 @@ $('#v-geo').onclick=showGeo;$('#v-sys').onclick=showSys;
 function initLeaflet(){if(!window.L){leafEl.hidden=true;svgWrap.hidden=false;return}
  const dark=document.documentElement.dataset.theme==='dark'||(document.documentElement.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
  lmap=L.map(leafEl,{scrollWheelZoom:false,zoomControl:true});
- L.tileLayer('https://{s}.basemaps.cartocdn.com/'+(dark?'dark_all':'light_all')+'/{z}/{x}/{y}{r}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:19}).addTo(lmap);
+ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(lmap);
  const C={metro:css('--l1'),surface:css('--surface'),mural:css('--l5'),graffiti:css('--l3'),sticker:css('--sticker')};
  L.polyline(ST.map(s=>s.ll),{color:C.metro,weight:6,opacity:.9}).addTo(lmap);
  const walls=SITES.filter(s=>!s.zone).sort((a,b)=>a.ll[1]-b.ll[1]);
  LL.stk=L.polyline(walls.map(s=>s.ll),{color:C.sticker,weight:3,dashArray:'2 9',lineCap:'round'}).addTo(lmap);
- ST.forEach(s=>L.circleMarker(s.ll,{radius:6,color:C.metro,weight:3,fillColor:C.surface,fillOpacity:1}).bindTooltip(s.n,{permanent:true,direction:'bottom',offset:[0,6],className:'st-tip'}).addTo(lmap));
+ ST.forEach((s,i)=>L.circleMarker(s.ll,{radius:6,color:C.metro,weight:3,fillColor:C.surface,fillOpacity:1}).bindTooltip(s.n,{permanent:true,direction:i%2?'top':'bottom',offset:[0,i%2?-6:6],className:'st-tip'}).addTo(lmap));
  SITES.forEach(s=>{const col=s.zone?C.mural:C.graffiti;const g=L.layerGroup().addTo(lmap);
   if(s.zone){g.addLayer(L.circle(s.ll,{radius:170,color:col,weight:2,dashArray:'5 6',fillOpacity:.08}))}
   const m=L.circleMarker(s.ll,{radius:s.zone?6:9,color:s.zone?col:C.surface,weight:2.5,fillColor:s.zone?C.surface:col,fillOpacity:1}).bindTooltip(s.zone?s.n:s.n.replace('Muro frente al ',''),{direction:'top',offset:[0,-8]});
