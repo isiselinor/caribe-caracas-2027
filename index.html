@@ -805,15 +805,15 @@ $('#tiers').innerHTML=TIERS.map(t=>`<div class="tier" style="--c:var(${t.c})"><h
 const ALLIES=[
  ['Marca de pintura y aerosoles','Pintura, imprimación y aerosoles',21800,1],
  ['Empresa de grúas y andamios','Alquiler de grúas y andamios',14080,0],
- ['Aerolínea','Vuelos de artistas de fuera',13200,0],
- ['Hotel','Alojamiento de artistas',11600,1],
+ ['Aerolínea','Vuelos de artistas de fuera',12400,0],
+ ['Hotel','Alojamiento de artistas',10150,1],
  ['Marca de alimentos y bebidas','Comidas e hidratación en jornada',8500,0],
  ['Empresa de transporte','Vans y combustible',8350,0],
  ['Alcaldías','Permisos, ocupación de vía y seguridad municipal',6050,0],
- ['Medios aliados','Pauta digital e impresos',4600,0],
+ ['Medios aliados','Pauta digital e impresos',3500,0],
  ['Productora o marca de equipos','Equipos de foto, video y timelapse',3400,0],
  ['Marca de skate','Premios y material de los juegos de skate y la competencia de tags',850,0]];
-const SUB=269140,MULT=1.15,BASE=Math.round(SUB*MULT);
+const SUB=260640,MULT=1.15,BASE=Math.round(SUB*MULT);
 const usd=n=>'USD '+Math.round(n).toLocaleString('es-VE');
 const al=$('#allies');
 ALLIES.forEach(([n,c,v,on],i)=>{const l=el('label',{class:'ally',for:'al'+i},`<input type="checkbox" id="al${i}" ${on?'checked':''}><span>${n}<small>${c}</small></span><b>${usd(v)}</b>`);al.append(l)});
