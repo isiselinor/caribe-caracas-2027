@@ -6,15 +6,18 @@ Página del festival de arte urbano Caribe Caracas 2027 para compartir con el eq
 
 1. En Netlify: **Add new site → Import an existing project → GitHub** y elegir este repositorio.
 2. No hace falta comando de build. La carpeta de publicación es la raíz (`.`), ya definida en `netlify.toml`.
-3. Activar formularios: **Site configuration → Forms → Enable form detection** y volver a desplegar.
 
-## Solicitudes del deck
+## Solicitudes del deck (Google Sheets + Apps Script)
 
-El formulario final usa Netlify Forms con el nombre `solicitud-deck`.
+El formulario envía cada solicitud a una Google Sheet mediante el script `apps-script/Code.gs`.
 
-- Las solicitudes aparecen en **Netlify → Forms → solicitud-deck**.
-- Para recibir un aviso por correo: **Forms → Form notifications → Add notification → Email notification**.
-- La aprobación es manual: revisar cada solicitud y enviar el deck por correo a las personas aprobadas.
+1. Crea una Google Sheet nueva y abre **Extensiones → Apps Script**.
+2. Pega el contenido de `apps-script/Code.gs` y completa `CONFIG`: `CORREO_AVISO` (tu correo) y `DECK_URL` (enlace al deck).
+3. Ejecuta la función `instalar` y acepta los permisos.
+4. **Implementar → Nueva implementación → Aplicación web.** Ejecutar como: Yo. Quién tiene acceso: Cualquier usuario.
+5. Copia la URL que termina en `/exec` y pégala en `SCRIPT_URL` dentro de `index.html`.
+
+Cada solicitud llega a la hoja **Solicitudes** con estado "Pendiente" y te avisa por correo. Para aprobar, cambia el estado a **Aprobado**: el deck se envía solo y la columna **Enviado** guarda la fecha. Si una fila aprobada no se envió (por ejemplo, porque faltaba el enlace del deck), ejecuta `enviarAprobadosPendientes`.
 
 ## Editar
 

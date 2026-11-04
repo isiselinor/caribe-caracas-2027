@@ -444,9 +444,8 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:13px;c
       <p class="lede">El deck incluye el detalle de producción, los escenarios de presupuesto y las oportunidades de alianza. Cada solicitud se revisa y, una vez aprobada, el deck se envía al correo indicado.</p>
       <div id="my-status"></div>
     </div>
-    <form id="req-form" name="solicitud-deck" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
-      <input type="hidden" name="form-name" value="solicitud-deck">
-      <p hidden><label>No completar<input name="bot-field"></label></p>
+    <form id="req-form" novalidate>
+      <p hidden><label>No completar<input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
       <label for="f-nombre">Nombre y apellido<input id="f-nombre" name="nombre" required autocomplete="name"></label>
       <label for="f-correo">Correo<input id="f-correo" name="correo" type="email" required autocomplete="email"></label>
       <label for="f-org">Organización<input id="f-org" name="organizacion" required autocomplete="organization"></label>
@@ -766,14 +765,16 @@ const RISKS=[
  ['Lectura política del festival','Política de neutralidad escrita, aliados de distinto tipo y vocería única del comité.']];
 $('#risks').innerHTML=RISKS.map(r=>`<details><summary>${r[0]}</summary><p>${r[1]}</p></details>`).join('');
 
-/* ---------- solicitud (Netlify Forms) ---------- */
+/* ---------- solicitud (Google Apps Script) ---------- */
+// Pega aquí la URL de la aplicación web de Apps Script (termina en /exec)
+const SCRIPT_URL='';
 const form=$('#req-form'),note=$('#f-note'),myStatus=$('#my-status');
 form.addEventListener('submit',async e=>{e.preventDefault();
  const v=k=>form.elements[k].value.trim();
  if(!v('nombre')||!v('organizacion')||!v('perfil')||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('correo'))){note.textContent='Completa nombre, un correo válido, organización e interés.';return}
  const btn=$('#f-send');btn.disabled=true;btn.textContent='Enviando…';
- try{const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form)).toString()});
-  if(!r.ok)throw new Error(r.status);
+ if(!SCRIPT_URL){note.textContent='El formulario todavía no está conectado. Escríbenos y te enviamos el deck.';btn.disabled=false;btn.textContent='Enviar solicitud';return}
+ try{await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:new URLSearchParams(new FormData(form))});
   myStatus.innerHTML=`<div class="status ok" style="margin-top:12px"><b>Solicitud recibida.</b> La revisamos y, si se aprueba, te enviamos el deck a ${esc(v('correo'))}.</div>`;
   form.reset();note.textContent='Gracias. Puedes cerrar esta página.';btn.textContent='Solicitud enviada'}
  catch(err){note.textContent='No se pudo enviar la solicitud. Revisa tu conexión e inténtalo otra vez.';btn.disabled=false;btn.textContent='Enviar solicitud'}});
