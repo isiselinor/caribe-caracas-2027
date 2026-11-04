@@ -280,7 +280,7 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:13px;c
   </div>
   <div class="ticket" role="img" aria-label="Boleto de acceso a la ruta del festival, válido del 5 al 7 de marzo de 2027">
     <div class="t-top"><span class="t-l">1</span><span>Caribe Caracas · 2027</span><span>Nº 000021</span></div>
-    <div class="t-main"><b>Acceso a la ruta</b><span>Plaza Venezuela → Los Cortijos</span></div>
+    <div class="t-main"><b>Acceso a la ruta</b><span>Parque Carabobo → Los Cortijos</span></div>
     <div class="t-grid"><div><small>Válido</small><b>05–07.03</b></div><div><small>Obras</small><b>14</b></div><div><small>Artistas</small><b>21</b></div></div>
     <div class="t-stripe"></div>
   </div>
@@ -335,7 +335,7 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:13px;c
         <div id="leaf" role="region" aria-label="Mapa real de la ruta"></div>
         <div class="map-scroll" hidden><svg id="map" viewBox="0 0 1000 400" role="img" aria-label="Mapa de la ruta del festival sobre la Línea 1 del Metro de Caracas"></svg></div>
         <div class="legend">
-          <span>● Muro de calle propuesto</span><span>◌ Zona de búsqueda de fachada</span><span>━ Línea 1 del Metro</span><span>Ubicaciones aproximadas · a verificar en campo</span>
+          <span>◯ Zona de intervención</span><span>● Muro de calle propuesto</span><span>◌ Zona de búsqueda de fachada</span><span>━ Línea 1 del Metro</span><span>Ubicaciones aproximadas · a verificar en campo</span>
         </div>
       </div>
       <aside class="panel" id="site-panel" aria-live="polite"></aside>
@@ -493,17 +493,18 @@ const ART=[
 $('#artists').innerHTML=ART.map(a=>{const m=MOVES.find(x=>x.id===a.m);return `<a class="move" style="--c:var(${m.c});text-decoration:none" href="https://www.instagram.com/${a.h}/" target="_blank" rel="noopener"><span class="badge c" style="justify-self:start">${m.n}</span><h3>${esc(a.n)}</h3><span class="scale">@${a.h} · ${esc(a.r)}</span><p>${esc(a.t)}</p><span class="go">Ver perfil ↗</span></a>`}).join('');
 
 /* ---------- mapa ---------- */
-const LON0=-66.893,LON1=-66.803,LAT0=10.479,LAT1=10.513;
+const LON0=-66.912,LON1=-66.803,LAT0=10.4748,LAT1=10.516;
 const P=(lat,lon)=>[(lon-LON0)/(LON1-LON0)*1000,(LAT1-lat)/(LAT1-LAT0)*400];
 const ST=[
+ ['pc','Parque Carabobo',10.5058,-66.9050],['ba','Bellas Artes',10.5017,-66.8975],['ci','Colegio de Ingenieros',10.5010,-66.8895],
  ['pv','Plaza Venezuela',10.4990,-66.8835],['sg','Sabana Grande',10.4958,-66.8763],['ct','Chacaíto',10.4919,-66.8689],
  ['ch','Chacao',10.4916,-66.8545],['al','Altamira',10.4964,-66.8488],['mi','Miranda',10.4935,-66.8330],
- ['dc','Los Dos Caminos',10.4958,-66.8222],['lc','Los Cortijos',10.4985,-66.8135]].map(([id,n,la,lo],i)=>({id,n,ll:[la,lo],geo:P(la,lo),sys:[90+i*117,205]}));
+ ['dc','Los Dos Caminos',10.4958,-66.8222],['lc','Los Cortijos',10.4985,-66.8135]].map(([id,n,la,lo],i)=>({id,n,ll:[la,lo],geo:P(la,lo),sys:[60+i*88,205]}));
 const stById=Object.fromEntries(ST.map(s=>[s.id,s]));
 const q=s=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(s);
 const osm=(la,lo)=>`https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=17/${la}/${lo}`;
 const SITES=[
- {id:'s1',n:'Bulevar de Sabana Grande',z:'Sabana Grande',mun:'Libertador',st:'sg',ll:[10.4950,-66.8745],side:-1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Bulevar de Sabana Grande, Caracas'},
+ {id:'s1',lab:'Bulevar',n:'Bulevar de Sabana Grande',z:'Sabana Grande',mun:'Libertador',st:'sg',ll:[10.4950,-66.8745],side:-1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Bulevar de Sabana Grande, Caracas'},
  {id:'s2',n:'Muro frente al Centro Lido',z:'El Rosal',mun:'Chacao',st:'ct',ll:[10.4912,-66.8627],side:1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Centro Lido, El Rosal, Caracas'},
  {id:'s3',n:'Muro frente al Sambil',z:'Chacao',mun:'Chacao',st:'ch',ll:[10.4890,-66.8540],side:1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Centro Sambil, Chacao, Caracas'},
  {id:'s4',n:'Zona de San Ignacio',z:'La Castellana',mun:'Chacao',st:'al',ll:[10.4985,-66.8560],side:-1,mv:['graffiti','sticker'],tipo:'Muro de calle',g:'Centro San Ignacio, Caracas'},
@@ -511,22 +512,25 @@ const SITES=[
  {id:'f1',n:'Zona de fachada A',z:'Plaza Venezuela',mun:'Libertador',st:'pv',ll:[10.5012,-66.8815],side:-1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Plaza Venezuela, Caracas',zone:1},
  {id:'f2',n:'Zona de fachada B',z:'Chacaíto',mun:'Chacao',st:'ct',ll:[10.4938,-66.8700],side:-1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Chacaíto, Caracas',zone:1},
  {id:'f3',n:'Zona de fachada C',z:'Altamira',mun:'Chacao',st:'al',ll:[10.4950,-66.8470],side:1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Plaza Altamira, Caracas',zone:1},
- {id:'f4',n:'Zona de fachada D',z:'Los Dos Caminos',mun:'Sucre',st:'dc',ll:[10.4978,-66.8205],side:-1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Los Dos Caminos, Caracas',zone:1}];
+ {id:'f4',n:'Zona de fachada D',z:'Los Dos Caminos',mun:'Sucre',st:'dc',ll:[10.4978,-66.8205],side:-1,mv:['mural'],tipo:'Zona de búsqueda de fachada',g:'Los Dos Caminos, Caracas',zone:1},
+ {id:'z1',n:'Zona de intervención La Candelaria',z:'La Candelaria',mun:'Libertador',st:'pc',ll:[10.5070,-66.9010],side:-1,mv:['graffiti','mural','sticker'],tipo:'Zona de intervención',g:'La Candelaria, Caracas',zone:2},
+ {id:'z2',n:'Zona de intervención La Carlota',z:'La Carlota',mun:'Por confirmar',st:'mi',ll:[10.4840,-66.8360],side:1,mv:['graffiti','mural','sticker'],tipo:'Zona de intervención',g:'La Carlota, Caracas',zone:2}];
 // schematic positions: stack sites at their station
 const stackCount={};
-SITES.forEach(s=>{s.geo=P(...s.ll);const key=s.st+s.side;stackCount[key]=(stackCount[key]||0)+1;const n=stackCount[key];const sx=stById[s.st].sys[0];s.sys=[sx+(n-1)*44*(s.side<0?1:-1)*0+(n>1?40:0),205+s.side*(s.zone?70:120)]});
+SITES.forEach(s=>{s.geo=P(...s.ll);const key=s.st+s.side;stackCount[key]=(stackCount[key]||0)+1;const n=stackCount[key];const sx=stById[s.st].sys[0];s.sys=[sx+(n-1)*44*(s.side<0?1:-1)*0+(n>1?40:0),205+s.side*(s.zone===2?150:s.zone?70:120)]});
+{const z=SITES.find(x=>x.id==='z2');z.sys=[stById.mi.sys[0],358];const c5=SITES.find(x=>x.id==='s5');c5.sys=[stById.mi.sys[0],318];}
 const svgNS='http://www.w3.org/2000/svg';
 const S=(t,a={})=>{const e=document.createElementNS(svgNS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
 const map=$('#map');
 const path=pts=>pts.map((p,i)=>(i?'L':'M')+P(...p).map(v=>v.toFixed(1)).join(' ')).join(' ');
 // background (geo only)
 const bg=S('g',{id:'bg'});
-const avila=[[10.513,-66.893],[10.5072,-66.893],[10.5052,-66.875],[10.5070,-66.858],[10.5050,-66.840],[10.5058,-66.826],[10.5040,-66.812],[10.5045,-66.803],[10.513,-66.803]];
+const avila=[[10.516,-66.912],[10.5100,-66.912],[10.5085,-66.900],[10.5072,-66.893],[10.5052,-66.875],[10.5070,-66.858],[10.5050,-66.840],[10.5058,-66.826],[10.5040,-66.812],[10.5045,-66.803],[10.516,-66.803]];
 bg.append(S('path',{d:path(avila)+'Z',fill:'var(--avila)'}));
 const lblA=S('text',{x:500,y:16,'text-anchor':'middle','font-size':12,class:'muted','letter-spacing':'2'});lblA.textContent='EL ÁVILA · PARQUE NACIONAL WARAIRA REPANO';bg.append(lblA);
 bg.append(S('path',{d:path([[10.4950,-66.8395],[10.4950,-66.8262],[10.4893,-66.8262],[10.4893,-66.8395]])+'Z',fill:'var(--park)'}));
 const lblP=S('text',{x:P(10.4915,-66.834)[0],y:P(10.4915,-66.834)[1]+18,'text-anchor':'middle','font-size':10,class:'muted'});lblP.textContent='Parque del Este';bg.append(lblP);
-const rio=[[10.4935,-66.893],[10.4898,-66.876],[10.4858,-66.861],[10.4845,-66.846],[10.4858,-66.830],[10.4874,-66.815],[10.4885,-66.803]];
+const rio=[[10.4975,-66.912],[10.4955,-66.900],[10.4935,-66.893],[10.4898,-66.876],[10.4858,-66.861],[10.4845,-66.846],[10.4858,-66.830],[10.4874,-66.815],[10.4885,-66.803]];
 bg.append(S('path',{d:path(rio),fill:'none',stroke:'var(--rio)','stroke-width':7,'stroke-linecap':'round'}));
 const lblR=S('text',{x:P(10.4835,-66.846)[0],y:P(10.4835,-66.846)[1]+10,'text-anchor':'middle','font-size':10,class:'muted'});lblR.textContent='Río Guaire';bg.append(lblR);
 const fdm=[[10.4919,-66.8689],[10.4922,-66.858],[10.4925,-66.853],[10.4966,-66.8488],[10.4960,-66.840],[10.4958,-66.830],[10.4962,-66.822],[10.4990,-66.813],[10.5000,-66.803]];
@@ -550,33 +554,34 @@ const stickerLine=S('path',{fill:'none',stroke:'var(--sticker)','stroke-width':2
 metroG.append(metro,stickerLine);
 const l1=S('text',{'font-size':11,'font-weight':500,'text-anchor':'end'});l1.textContent='LÍNEA 1';metroG.append(l1);
 ST.forEach(s=>{s.g=S('g');s.c=S('circle',{r:7,fill:'var(--surface)',stroke:'var(--metro)','stroke-width':3});s.t=S('text',{'font-size':11,'text-anchor':'middle'});s.t.textContent=s.n;s.g.append(s.c,s.t);stG.append(s.g)});
-const colorOf=s=>s.mv.includes('mural')?'var(--mural)':'var(--graffiti)';
+const colorOf=s=>s.zone===2?'var(--l2)':s.mv.includes('mural')?'var(--mural)':'var(--graffiti)';
 SITES.forEach(s=>{s.con=S('line',{stroke:'var(--muted)','stroke-width':1.2,'stroke-dasharray':'3 3'});conG.append(s.con);
  s.g=S('g',{class:'site',tabindex:0,role:'button','aria-label':s.n});
- s.ring=S('circle',{r:s.zone?16:0,fill:'none',stroke:colorOf(s),'stroke-width':2,'stroke-dasharray':'4 4'});
- s.pin=S('circle',{class:'pin',r:s.zone?6:9,fill:s.zone?'var(--surface)':colorOf(s),stroke:s.zone?colorOf(s):'var(--surface)','stroke-width':2.5});
+ s.ring=S('circle',{r:s.zone===2?26:s.zone?16:0,fill:s.zone===2?'var(--l2)':'none','fill-opacity':.12,stroke:colorOf(s),'stroke-width':s.zone===2?2.5:2,'stroke-dasharray':'4 4'});
+ s.pin=S('circle',{class:'pin',r:s.zone===2?7:s.zone?6:9,fill:s.zone?'var(--surface)':colorOf(s),stroke:s.zone?colorOf(s):'var(--surface)','stroke-width':2.5});
  s.stk=S('rect',{width:8,height:8,rx:1.5,fill:'var(--sticker)',opacity:0,transform:'rotate(12)'});
- s.t=S('text',{'font-size':11,'font-weight':500,'text-anchor':'middle'});s.t.textContent=s.zone?s.n.replace('Zona de f','F'):s.n.replace('Muro frente al ','');
+ s.t=S('text',{'font-size':11,'font-weight':500,'text-anchor':'middle'});s.t.textContent=s.lab?s.lab:s.zone===2?s.z:s.zone?s.n.replace('Zona de f','F'):s.n.replace('Muro frente al ','');if(s.zone===2)s.t.setAttribute('font-weight',700);
  s.g.append(s.ring,s.pin,s.stk,s.t);siteG.append(s.g);
  s.g.addEventListener('click',()=>selectSite(s.id));s.g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectSite(s.id)}})});
 let mode='geo',tween=1,from='geo';
 const lerp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
 function pos(o){return from===mode?o[mode]:lerp(o[from],o[mode],tween)}
-const GST={pv:[0,-14,'middle'],sg:[0,-14,'middle'],ct:[-10,16,'end'],ch:[-10,-10,'end'],al:[0,-14,'middle'],mi:[-8,20,'end'],dc:[-10,-8,'end'],lc:[0,24,'middle']};
-const GSI={s1:[-12,4,'end'],s2:[0,24,'middle'],s3:[0,24,'middle'],s4:[0,-14,'middle'],s5:[12,4,'start']};
+const GST={pc:[0,22,'middle'],ba:[0,22,'middle'],ci:[0,-14,'middle'],pv:[0,22,'middle'],sg:[10,-8,'start'],ct:[-10,16,'end'],ch:[-10,-10,'end'],al:[0,-14,'middle'],mi:[-8,20,'end'],dc:[-10,-8,'end'],lc:[0,24,'middle']};
+const SYSL={s5:[12,4,'start'],z2:[34,5,'start']};
+const GSI={z1:[0,-34,'middle'],z2:[0,42,'middle'],s1:[-12,4,'end'],s2:[0,24,'middle'],s3:[0,24,'middle'],s4:[0,-14,'middle'],s5:[12,4,'start']};
 function draw(){
  const inSys=from===mode?mode==='sys':(tween>.5?mode==='sys':from==='sys');
  const pts=ST.map(pos);metro.setAttribute('d',pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(''));
- const sw=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+(p[1]+(inSys?-12:12)).toFixed(1)).join('');stickerLine.setAttribute('d',sw);
- l1.setAttribute('x',pts[0][0]-14);l1.setAttribute('y',pts[0][1]+4);
+ const sw=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+(p[1]+12).toFixed(1)).join('');stickerLine.setAttribute('d',sw);
+ l1.setAttribute('x',pts[0][0]-14);l1.setAttribute('y',pts[0][1]+(inSys?4:-8));
  const op=from===mode?(mode==='geo'?1:0):(mode==='geo'?tween:1-tween);bg.style.opacity=op;deco.style.opacity=op;
  ST.forEach((s,i)=>{const p=pts[i];s.c.setAttribute('cx',p[0]);s.c.setAttribute('cy',p[1]);
-  const o=inSys?[0,32,'middle']:GST[s.id];s.t.setAttribute('x',p[0]+o[0]);s.t.setAttribute('y',p[1]+o[1]);s.t.setAttribute('text-anchor',o[2])});
+  const o=inSys?(i%2?[0,-14,'middle']:[0,32,'middle']):GST[s.id];s.t.setAttribute('x',p[0]+o[0]);s.t.setAttribute('y',p[1]+o[1]);s.t.setAttribute('text-anchor',o[2])});
  SITES.forEach(s=>{const p=pos(s),sp=pos(stById[s.st]);s.pin.setAttribute('cx',p[0]);s.pin.setAttribute('cy',p[1]);s.ring.setAttribute('cx',p[0]);s.ring.setAttribute('cy',p[1]);
   s.stk.setAttribute('x',p[0]+7);s.stk.setAttribute('y',p[1]-13);s.stk.setAttribute('transform',`rotate(14 ${p[0]+11} ${p[1]-9})`);
-  let o;if(inSys)o=[0,s.side<0?-(s.zone?22:16):(s.zone?30:24),'middle'];else o=s.zone?[0,-22,'middle']:GSI[s.id];
+  let o;if(inSys&&SYSL[s.id])o=SYSL[s.id];else if(inSys)o=[0,s.side<0?-(s.zone===2?34:s.zone?22:16):(s.zone===2?42:s.zone?30:24),'middle'];else o=s.zone===1?[0,-22,'middle']:GSI[s.id];
   s.t.setAttribute('x',p[0]+o[0]);s.t.setAttribute('y',p[1]+o[1]);s.t.setAttribute('text-anchor',o[2]);
-  s.t.style.opacity=(!inSys&&s.zone&&!s.g.classList.contains('sel'))?0:1;
+  s.t.style.opacity=(!inSys&&s.zone===1&&!s.g.classList.contains('sel'))?0:1;
   s.con.setAttribute('x1',p[0]);s.con.setAttribute('y1',p[1]);s.con.setAttribute('x2',sp[0]);s.con.setAttribute('y2',sp[1])});
 }
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -591,14 +596,15 @@ function initLeaflet(){if(!window.L){leafEl.hidden=true;svgWrap.hidden=false;ret
  const dark=document.documentElement.dataset.theme==='dark'||(document.documentElement.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
  lmap=L.map(leafEl,{scrollWheelZoom:false,zoomControl:true});
  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(lmap);
- const C={metro:css('--l1'),surface:css('--surface'),mural:css('--l5'),graffiti:css('--l3'),sticker:css('--sticker')};
+ const C={zona:css('--l2'),metro:css('--l1'),surface:css('--surface'),mural:css('--l5'),graffiti:css('--l3'),sticker:css('--sticker')};
  L.polyline(ST.map(s=>s.ll),{color:C.metro,weight:6,opacity:.9}).addTo(lmap);
  const walls=SITES.filter(s=>!s.zone).sort((a,b)=>a.ll[1]-b.ll[1]);
  LL.stk=L.polyline(walls.map(s=>s.ll),{color:C.sticker,weight:3,dashArray:'2 9',lineCap:'round'}).addTo(lmap);
  ST.forEach((s,i)=>L.circleMarker(s.ll,{radius:6,color:C.metro,weight:3,fillColor:C.surface,fillOpacity:1}).bindTooltip(s.n,{permanent:true,direction:i%2?'top':'bottom',offset:[0,i%2?-6:6],className:'st-tip'}).addTo(lmap));
  SITES.forEach(s=>{const col=s.zone?C.mural:C.graffiti;const g=L.layerGroup().addTo(lmap);
-  if(s.zone){g.addLayer(L.circle(s.ll,{radius:170,color:col,weight:2,dashArray:'5 6',fillOpacity:.08}))}
-  const m=L.circleMarker(s.ll,{radius:s.zone?6:9,color:s.zone?col:C.surface,weight:2.5,fillColor:s.zone?C.surface:col,fillOpacity:1}).bindTooltip(s.zone?s.n:s.n.replace('Muro frente al ',''),{direction:'top',offset:[0,-8]});
+  const zc=s.zone===2?C.zona:col;
+  if(s.zone){g.addLayer(L.circle(s.ll,{radius:s.zone===2?450:170,color:zc,weight:s.zone===2?2.5:2,dashArray:'5 6',fillColor:zc,fillOpacity:s.zone===2?.12:.08}))}
+  const m=L.circleMarker(s.ll,{radius:s.zone?6:9,color:s.zone?zc:C.surface,weight:2.5,fillColor:s.zone?C.surface:col,fillOpacity:1}).bindTooltip(s.zone===2?s.z:s.zone?s.n:s.n.replace('Muro frente al ',''),{direction:'top',offset:[0,-8],permanent:s.zone===2,className:s.zone===2?'st-tip':''});
   m.on('click',()=>selectSite(s.id));g.addLayer(m);LL[s.id]=g});
  lmap.fitBounds(L.latLngBounds([...ST.map(s=>s.ll),...SITES.map(s=>s.ll)]).pad(.08));
  svgWrap.hidden=true;leafEl.hidden=false}
@@ -612,16 +618,16 @@ function applyFilter(){fbox.querySelectorAll('.chip').forEach(b=>b.setAttribute(
  SITES.forEach(s=>{const on=s.mv.some(m=>m!=='sticker'&&active.has(m))||(active.has('sticker')&&s.mv.includes('sticker'));s.g.style.opacity=on?1:.15;s.con.style.opacity=on?1:.15;
   s.stk.setAttribute('opacity',active.has('sticker')&&s.mv.includes('sticker')?1:0)});
  stickerLine.setAttribute('opacity',active.has('sticker')?1:0);
- if(lmap){SITES.forEach(s=>{const on=s.mv.some(m=>m!=='sticker'&&active.has(m))||(active.has('sticker')&&s.mv.includes('sticker'));LL[s.id].eachLayer(l=>l.setStyle({opacity:on?1:.15,fillOpacity:on?(l instanceof L.Circle?.08:1):.1}))});LL.stk.setStyle({opacity:active.has('sticker')?1:0})}}
+ if(lmap){SITES.forEach(s=>{const on=s.mv.some(m=>m!=='sticker'&&active.has(m))||(active.has('sticker')&&s.mv.includes('sticker'));LL[s.id].eachLayer(l=>l.setStyle({opacity:on?1:.15,fillOpacity:on?(l instanceof L.Circle?(s.zone===2?.12:.08):1):.1}))});LL.stk.setStyle({opacity:active.has('sticker')?1:0})}}
 const panel=$('#site-panel');
 function listHTML(){return `<div class="list-sites">${SITES.map(s=>`<button data-s="${s.id}" style="--c:${colorOf(s)}"><i></i><span>${esc(s.n)}<br><small class="note">${esc(s.z)} · ${esc(s.mun)}</small></span></button>`).join('')}</div>`}
-function overview(){panel.innerHTML=`<p class="eyebrow">Ruta propuesta</p><h3>5 de 10 muros de calle identificados</h3><p class="note">Las 4 fachadas se buscan en edificios visibles desde avenidas principales. Los muros restantes salen del scouting de noviembre, con 6 de reserva. El cierre se hace en el punto más importante al final de la ruta, todavía por definir.</p>${listHTML()}`;bindList()}
+function overview(){panel.innerHTML=`<p class="eyebrow">Ruta propuesta</p><h3>2 zonas de intervención y 5 de 10 muros de calle identificados</h3><p class="note">La ruta va de La Candelaria, al oeste, a La Carlota, al este, siguiendo la Línea 1. Las 4 fachadas se buscan en edificios visibles desde avenidas principales. Los muros restantes salen del scouting de noviembre, con 6 de reserva. El cierre se hace en el punto más importante al final de la ruta, todavía por definir.</p>${listHTML()}`;bindList()}
 function bindList(){panel.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>selectSite(b.dataset.s))}
 function selectSite(id){const s=SITES.find(x=>x.id===id);SITES.forEach(x=>x.g.classList.toggle('sel',x.id===id));draw();if(lmap&&!leafEl.hidden)lmap.flyTo(s.ll,16,{duration:reduce?0:.8});
  const stn=stById[s.st].n;const mvs=s.mv.map(m=>MOVES.find(x=>x.id===m)).map(m=>`<span class="badge c" style="--c:var(${m.c})">${m.n}</span>`).join(' ');
  panel.innerHTML=`<p class="eyebrow">${esc(s.tipo)}</p><h3>${esc(s.n)}</h3><div>${mvs}</div>
- <dl class="kv"><dt>Zona</dt><dd>${esc(s.z)}</dd><dt>Municipio</dt><dd>${esc(s.mun)}</dd><dt>Estación</dt><dd>${esc(stn)} · Línea 1</dd><dt>Estado</dt><dd>${s.zone?'En búsqueda de edificio y propietario':'Candidato · por confirmar con propietario y alcaldía'}</dd></dl>
- <p class="note">${s.zone?'Fachada de gran formato pintada en pareja mixta. Se pinta desde el 22 de febrero y se termina en vivo durante el festival.':'Mural de calle con estación de stickers. Se presenta a los vecinos antes de pintar y se pinta del 3 al 6 de marzo.'}</p>
+ <dl class="kv"><dt>Zona</dt><dd>${esc(s.z)}</dd><dt>Municipio</dt><dd>${esc(s.mun)}</dd><dt>Estación</dt><dd>${esc(stn)} · Línea 1</dd><dt>Estado</dt><dd>${s.zone===2?'Zona definida por CMS-Caribes · puntos por definir':s.zone?'En búsqueda de edificio y propietario':'Candidato · por confirmar con propietario y alcaldía'}</dd></dl>
+ <p class="note">${s.zone===2?'Zona de intervención en un extremo de la ruta. Los muros y el tipo de intervención se definen con CMS-Caribes.':s.zone?'Fachada de gran formato pintada en pareja mixta. Se pinta desde el 22 de febrero y se termina en vivo durante el festival.':'Mural de calle con estación de stickers. Se presenta a los vecinos antes de pintar y se pinta del 3 al 6 de marzo.'}</p>
  <div class="links"><a class="btn" href="${q(s.g)}" target="_blank" rel="noopener">Ver en Google Maps ↗</a><a class="btn" href="${osm(...s.ll)}" target="_blank" rel="noopener">OpenStreetMap ↗</a></div>
  <button class="chip" id="back-list" style="justify-self:start">← Todos los puntos</button>`;
  $('#back-list').onclick=()=>{SITES.forEach(x=>x.g.classList.remove('sel'));draw();overview()}}
