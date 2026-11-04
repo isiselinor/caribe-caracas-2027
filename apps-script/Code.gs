@@ -17,7 +17,9 @@ const CONFIG = {
   CORREO_AVISO: '',          // tu correo: recibes un aviso por cada solicitud nueva
   DECK_URL: '',              // enlace al deck (Drive, Claude, PDF). Vacío = no se envía nada
   ASUNTO_DECK: 'Caribe Caracas 2027 · Deck del festival',
-  FIRMA: 'Equipo Caribe Caracas 2027'
+  FIRMA: 'Equipo Caribe Caracas 2027',
+  REMITENTE: '',             // opcional: alias verificado en Gmail (Configuración → Cuentas → Enviar correo como)
+  RESPONDER_A: ''            // opcional: correo que recibe las respuestas
 };
 
 const COLUMNAS = ['Fecha', 'Nombre', 'Correo', 'Organización', 'Interés', 'Mensaje', 'Estado', 'Enviado', 'Notas'];
@@ -98,7 +100,14 @@ function enviarDeck_(hoja, fila) {
     '<p><a href="' + CONFIG.DECK_URL + '">Ver el deck</a></p>' +
     '<p>Quedamos atentos a tus comentarios.</p><p>' + escapar_(CONFIG.FIRMA) + '</p>';
   try {
-    MailApp.sendEmail({ to: correo, subject: CONFIG.ASUNTO_DECK, body: cuerpo, htmlBody: html, name: CONFIG.FIRMA });
+    const opciones = { htmlBody: html, name: CONFIG.FIRMA };
+    if (CONFIG.RESPONDER_A) opciones.replyTo = CONFIG.RESPONDER_A;
+    if (CONFIG.REMITENTE) {
+      opciones.from = CONFIG.REMITENTE; // debe ser un alias verificado de esta cuenta
+      GmailApp.sendEmail(correo, CONFIG.ASUNTO_DECK, cuerpo, opciones);
+    } else {
+      MailApp.sendEmail(correo, CONFIG.ASUNTO_DECK, cuerpo, opciones);
+    }
     enviado.setValue(new Date());
     notas.setValue('');
   } catch (err) {
