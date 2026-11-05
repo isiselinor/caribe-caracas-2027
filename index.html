@@ -73,13 +73,35 @@ button{font:inherit;color:inherit;cursor:pointer}
 a{color:inherit}
 
 /* nav */
-nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-nav.top .wrap{display:flex;align-items:center;gap:18px;padding-block:10px;overflow-x:auto;scrollbar-width:none}
-nav.top .brand{font-family:var(--f-display);font-weight:800;white-space:nowrap}
-nav.top a{text-decoration:none;font-size:14px;color:var(--muted);white-space:nowrap;padding:4px 2px;border-bottom:2px solid transparent}
-nav.top a.on{color:var(--ink);border-color:var(--ink)}
-nav.top .lang{margin-left:auto;border:1.5px solid var(--ink);background:none;border-radius:999px;padding:4px 10px;font-family:var(--f-mono);font-size:12px;font-weight:500;white-space:nowrap}
-nav.top .cta{background:var(--ink);color:var(--bg);padding:6px 12px;border-radius:999px;border:none}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink)}
+nav.top .wrap{display:flex;align-items:center;gap:18px;padding-block:8px}
+nav.top .brand{font-family:var(--f-display);font-stretch:115%;font-weight:900;white-space:nowrap;text-decoration:none;color:var(--ink)}
+nav.top .brand i{width:30px;height:30px;font-size:15px}
+.linenav{flex:1;min-width:0;position:relative;display:flex;justify-content:space-between;align-items:flex-start;padding:2px 6px 0}
+.linenav::before,.linenav .prog{content:"";position:absolute;left:13px;top:9px;height:6px;border-radius:3px}
+.linenav::before{right:13px;background:var(--soft)}
+.linenav .prog{width:calc((100% - 26px) * var(--p,0));background:var(--l1);transition:width .35s ease}
+.stn{position:relative;z-index:1;display:grid;justify-items:center;gap:5px;text-decoration:none;color:var(--muted);min-width:0;flex:0 0 auto}
+.stn i{display:block;width:16px;height:16px;border-radius:50%;background:var(--surface);border:3.5px solid var(--line);transition:all .25s}
+.stn span{font-family:var(--f-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.stn.past i{border-color:var(--l1)}
+.stn.on i{border-color:var(--l1);background:var(--l1);box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--l1)}
+.stn.on span{color:var(--ink);font-weight:500}
+.stn:hover i{border-color:var(--l1)}
+@media (max-width:1100px){.stn span{display:none}.stn.on span{display:block;position:absolute;top:24px;background:var(--ink);color:var(--bg);padding:1px 6px;border-radius:3px}}
+@media (max-width:620px){nav.top .brand b{display:none}nav.top .cta{display:none}}
+nav.top .lang{border:1.5px solid var(--ink);background:none;border-radius:4px;padding:4px 8px;font-family:var(--f-mono);font-size:12px;font-weight:500;white-space:nowrap}
+nav.top .cta{background:var(--l1);color:#fff;padding:7px 14px;border-radius:4px;border:none;text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap}
+/* letrero de estación */
+.eyebrow.ln{display:inline-flex;justify-self:start;background:var(--ink);color:var(--bg);padding:5px 14px 5px 5px;border-radius:6px;font-size:12px;letter-spacing:.1em}
+.eyebrow.ln i{box-shadow:0 0 0 2px var(--ink),0 0 0 3.5px var(--bg)}
+/* andén: franja táctil */
+section,#top{position:relative;scroll-margin-top:84px}
+html{scroll-behavior:smooth}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+section::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:radial-gradient(circle,color-mix(in srgb,var(--l4) 85%,transparent) 1.6px,transparent 2px) 0 0/9px 9px;opacity:.75}
+/* portada: baldosas */
+.hero{position:relative;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(color-mix(in srgb,var(--line) 45%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--line) 45%,transparent) 1px,transparent 1px);background-size:34px 22px;-webkit-mask-image:radial-gradient(ellipse 75% 70% at 70% 40%,#000 25%,transparent 80%);mask-image:radial-gradient(ellipse 75% 70% at 70% 40%,#000 25%,transparent 80%)}
 
 /* hero */
 .hero{padding-block:48px 40px;display:grid;gap:28px;overflow-x:clip}
@@ -96,7 +118,7 @@ nav.top .cta{background:var(--ink);color:var(--bg);padding:6px 12px;border-radiu
 .facts span{font-size:13px;color:var(--muted)}
 @media (max-width:640px){.facts div:last-child:nth-child(odd){grid-column:1/-1}}
 
-section{padding-block:56px;border-top:1px solid var(--line)}
+section{padding-block:60px}
 .sec-head{display:grid;gap:12px;margin-bottom:28px}
 
 /* movimientos */
@@ -280,23 +302,25 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:13px;c
 
 <nav class="top" aria-label="Secciones">
   <div class="wrap">
-    <span class="brand ln" style="--c:var(--l1)"><i>1</i>Caribe Caracas</span>
-    <a href="#movimientos">Movimientos</a>
-    <a href="#artistas">Artistas</a>
-    <a href="#mapa">Ruta</a>
-    <a href="#cronograma">Cronograma</a>
-    <a href="#programa">Programa</a>
-    <a href="#merch">Merch</a>
-    <a href="#impacto">Impacto</a>
-    <a href="#equipo">Equipo</a>
-    <a href="#riesgos">Riesgos</a>
-    <a href="#sumarte">Sumarte</a>
+    <a class="brand ln" href="#top" style="--c:var(--l1)"><i>1</i><b>Caribe Caracas</b></a>
+    <div class="linenav" id="linenav"><span class="prog" aria-hidden="true"></span>
+      <a class="stn" href="#movimientos" title="Movimientos"><i></i><span>Movimientos</span></a>
+      <a class="stn" href="#artistas" title="Artistas"><i></i><span>Artistas</span></a>
+      <a class="stn" href="#mapa" title="Ruta"><i></i><span>Ruta</span></a>
+      <a class="stn" href="#cronograma" title="Cronograma"><i></i><span>Cronograma</span></a>
+      <a class="stn" href="#programa" title="Programa"><i></i><span>Programa</span></a>
+      <a class="stn" href="#merch" title="Merch"><i></i><span>Merch</span></a>
+      <a class="stn" href="#impacto" title="Impacto"><i></i><span>Impacto</span></a>
+      <a class="stn" href="#equipo" title="Equipo"><i></i><span>Equipo</span></a>
+      <a class="stn" href="#riesgos" title="Riesgos"><i></i><span>Riesgos</span></a>
+      <a class="stn" href="#sumarte" title="Sumarte"><i></i><span>Sumarte</span></a>
+    </div>
     <button class="lang" id="lang" type="button" aria-label="Change language to English">EN</button>
     <a class="cta" href="#deck">Solicitar el deck</a>
   </div>
 </nav>
 
-<header class="wrap hero">
+<header class="wrap hero" id="top">
   <div class="stripes" aria-hidden="true"><span style="background:var(--l1)"></span><span style="background:var(--l2)"></span><span style="background:var(--l3)"></span><span style="background:var(--l4)"></span><span style="background:var(--l5)"></span></div>
   <div class="hero-top"><div>
   <p class="eyebrow">Festival de arte urbano · Propuesta de CMS-Caribes · Versión para comité</p>
@@ -920,8 +944,10 @@ mo.observe(document.body,{childList:true,subtree:true});
 setLang(LANG);
 
 /* nav activo */
-const links=[...document.querySelectorAll('nav.top a[href^="#"]:not(.cta)')];
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-40% 0px -55% 0px'});
+const stns=[...document.querySelectorAll('#linenav .stn')];const ln=$('#linenav');
+function setStn(id){const k=stns.findIndex(a=>a.getAttribute('href')==='#'+id);stns.forEach((a,i)=>{a.classList.toggle('on',i===k);a.classList.toggle('past',k>=0&&i<k);if(i===k)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')});ln.style.setProperty('--p',k<0?0:k/(stns.length-1))}
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const id=e.target.id;if(stns.some(a=>a.getAttribute('href')==='#'+id))setStn(id);else if(id==='deck')setStn('sumarte');else if(id==='top')setStn('')}}),{rootMargin:'-40% 0px -55% 0px'});
+io.observe($('#top'));
 document.querySelectorAll('section[id]').forEach(s=>io.observe(s));
 })();
 </script>
